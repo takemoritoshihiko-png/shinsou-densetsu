@@ -91,6 +91,30 @@ class BattleScene {
 
     this.player.update(dt);
 
+    // プレイヤーに敵配列とコールバックを渡す
+    this.player._enemies = this.enemies;
+    if (!this.player._onAttackCallback) {
+      var self = this;
+      this.player._onAttackCallback = function (x, y, damage, critical, enemy, killed) {
+        self.damageNumbers.push(new DamageNumber(x, y, damage, critical));
+        if (self.skillSystem) self.skillSystem.addGauge(damage);
+        if (killed) {
+          self.player.addReward(enemy.exp, enemy.gold);
+          var ups = LevelSystem.gainExp(self.player, enemy.exp);
+          if (ups > 0) {
+            self.levelUpEffects.push(
+              new LevelUpEffect(self.player.x + self.player.width / 2, self.player.y)
+            );
+          }
+          var ecx = enemy.x + enemy.width / 2;
+          self._spawnDrops(enemy, ecx, enemy.y + enemy.height / 2);
+          if (self.bookSystem && enemy._bookId) {
+            self.bookSystem.registerMonsterKill(enemy._bookId);
+          }
+        }
+      };
+    }
+
     if (this.player.hp <= 0) {
       this.battleEnded = true;
       this.endResult = 'fail';
@@ -112,6 +136,14 @@ class BattleScene {
       var enemy = this.enemies[i];
       enemy.update(dt, this.player);
       if (enemy.isFinished()) this.enemies.splice(i, 1);
+    }
+
+    // 画面外に出た敵を除外
+    for (var oe = this.enemies.length - 1; oe >= 0; oe--) {
+      if (this.enemies[oe].alive && this.enemies[oe].x < -this.enemies[oe].width) {
+        this.enemies[oe].alive = false;
+        this.enemies.splice(oe, 1);
+      }
     }
 
     // 生存敵数

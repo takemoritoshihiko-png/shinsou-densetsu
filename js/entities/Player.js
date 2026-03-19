@@ -20,6 +20,13 @@ class Player {
     // 接地判定
     this.grounded = true;
 
+    // 自動攻撃
+    this.attackTimer = 0;
+    this.attackInterval = 0.8; // 秒
+    this.attackRange = 80;     // px
+    this._enemies = [];        // BattleSceneから毎フレーム渡される
+    this._onAttackCallback = null; // ダメージ数字表示用コールバック
+
     // キャラクター情報
     this.name = 'プレイヤー';
     this.level = 1;
@@ -52,6 +59,7 @@ class Player {
 
     // HP自動回復の蓄積
     this._regenAccum = 0;
+    this.attackTimer = 0;
   }
 
   getClassLevel() {
@@ -154,6 +162,13 @@ class Player {
       }
     }
 
+    // 自動攻撃処理
+    this.attackTimer += sec;
+    if (this.attackTimer >= this.attackInterval) {
+      this._tryAutoAttack();
+      this.attackTimer = 0;
+    }
+
     // 左右移動
     this.vx = 0;
     if (this.inputManager.isKeyDown('left'))  this.vx = -CONFIG.PLAYER_SPEED;
@@ -186,6 +201,31 @@ class Player {
     if (this.x < 0) this.x = 0;
     if (this.x > CONFIG.CANVAS_WIDTH - this.width) {
       this.x = CONFIG.CANVAS_WIDTH - this.width;
+    }
+  }
+
+  _tryAutoAttack() {
+    if (this.hp <= 0) return;
+    var pcx = this.x + this.width / 2;
+    var nearest = null;
+    var nearestDist = Infinity;
+    for (var i = 0; i < this._enemies.length; i++) {
+      var enemy = this._enemies[i];
+      if (!enemy.alive) continue;
+      var ecx = enemy.x + enemy.width / 2;
+      var dist = Math.abs(pcx - ecx);
+      if (dist < nearestDist) {
+        nearestDist = dist;
+        nearest = enemy;
+      }
+    }
+    if (nearest && nearestDist <= this.attackRange) {
+      var result = CombatSystem.calcPhysical(this, nearest);
+      var killed = nearest.takeDamage(result.damage);
+      var ecx2 = nearest.x + nearest.width / 2;
+      if (this._onAttackCallback) {
+        this._onAttackCallback(ecx2, nearest.y - 10, result.damage, result.critical, nearest, killed);
+      }
     }
   }
 
