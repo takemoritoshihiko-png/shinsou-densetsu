@@ -58,6 +58,7 @@ class BattleScene {
     this.waveManager.start();
 
     // BGM開始
+    SoundSystem.resume();
     SoundSystem.startBattleBGM();
 
     // フィールド装飾を生成

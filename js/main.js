@@ -2,7 +2,8 @@
 (function () {
   const canvas = document.getElementById('game-canvas');
   const ctx = canvas.getContext('2d');
-// 音響システム初期化  SoundSystem.init();
+  // 音響システム初期化
+  SoundSystem.init();
 
   canvas.width = CONFIG.CANVAS_WIDTH;
   canvas.height = CONFIG.CANVAS_HEIGHT;
@@ -186,7 +187,7 @@ sceneManager.register('saveload', new SaveLoadScene(sceneManager, gameState));
 
   // タップ入力
   canvas.addEventListener('click', function (e) {
-SoundSystem.resume();
+    SoundSystem.resume();
     const pos = getCanvasPosition(e);
     sceneManager.handleTap(pos.x, pos.y);
   });

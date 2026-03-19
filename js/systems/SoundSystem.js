@@ -31,7 +31,7 @@ var SoundSystem = {
     var gain = this._ctx.createGain();
     osc.type = type || 'square';
     osc.frequency.value = freq;
-    gain.gain.value = (vol || 0.15) * this.seVolume;
+    gain.gain.value = (vol || 0.3) * this.seVolume;
     gain.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + (duration || 0.1));
     osc.connect(gain);
     gain.connect(this._masterVol);
@@ -49,7 +49,7 @@ var SoundSystem = {
     var src = this._ctx.createBufferSource();
     src.buffer = buffer;
     var gain = this._ctx.createGain();
-    gain.gain.value = (vol || 0.08) * this.seVolume;
+    gain.gain.value = (vol || 0.2) * this.seVolume;
     gain.gain.exponentialRampToValueAtTime(0.001, this._ctx.currentTime + duration);
     src.connect(gain);
     gain.connect(this._masterVol);
@@ -136,47 +136,77 @@ var SoundSystem = {
     this.resume();
     this._bgmPlaying = true;
     var ctx = this._ctx;
+    var vol = this.bgmVolume;
 
-    this._bgmGain = ctx.createGain();
-    this._bgmGain.gain.value = 0.06 * this.bgmVolume;
-    this._bgmGain.connect(this._masterVol);
+    // メインメロディ
+    var melody = ctx.createOscillator();
+    melody.type = 'sawtooth';
+    melody.frequency.value = 220;
+    var melodyGain = ctx.createGain();
+    melodyGain.gain.value = 0.18 * vol;
+    melody.connect(melodyGain);
+    melodyGain.connect(this._masterVol);
+    melody.start();
+    this._bgmOsc = melody;
+    this._bgmGain = melodyGain;
+
+    // メロディをLFOで揺らす
+    var lfo = ctx.createOscillator();
+    lfo.type = 'sine';
+    lfo.frequency.value = 3;
+    var lfoGain = ctx.createGain();
+    lfoGain.gain.value = 60;
+    lfo.connect(lfoGain);
+    lfoGain.connect(melody.frequency);
+    lfo.start();
+    this._bgmLfo = lfo;
 
     // ベースライン
     var bass = ctx.createOscillator();
     bass.type = 'triangle';
     bass.frequency.value = 110;
     var bassGain = ctx.createGain();
-    bassGain.gain.value = 0.08 * this.bgmVolume;
+    bassGain.gain.value = 0.2 * vol;
     bass.connect(bassGain);
     bassGain.connect(this._masterVol);
     bass.start();
     this._bgmBass = bass;
     this._bgmBassGain = bassGain;
 
-    // メロディ的なアルペジオ
-    var osc = ctx.createOscillator();
-    osc.type = 'sine';
-    osc.frequency.value = 220;
-    osc.connect(this._bgmGain);
-    osc.start();
-    this._bgmOsc = osc;
+    // ベースをゆっくり揺らす
+    var bassLfo = ctx.createOscillator();
+    bassLfo.type = 'sine';
+    bassLfo.frequency.value = 0.5;
+    var bassLfoGain = ctx.createGain();
+    bassLfoGain.gain.value = 20;
+    bassLfo.connect(bassLfoGain);
+    bassLfoGain.connect(bass.frequency);
+    bassLfo.start();
+    this._bgmBassLfo = bassLfo;
 
-    // LFOでメロディを揺らす
-    var lfo = ctx.createOscillator();
-    lfo.type = 'sine';
-    lfo.frequency.value = 2;
-    var lfoGain = ctx.createGain();
-    lfoGain.gain.value = 40;
-    lfo.connect(lfoGain);
-    lfoGain.connect(osc.frequency);
-    lfo.start();
-    this._bgmLfo = lfo;
-
-    // リズム用
+    // リズム（キックドラム風）
+    var self = this;
     this._bgmRhythmId = setInterval(function () {
-      if (!SoundSystem._ctx || !SoundSystem._bgmPlaying) return;
-      SoundSystem._playTone(80, 0.05, 'square', 0.03 * SoundSystem.bgmVolume);
-    }, 500);
+      if (!self._ctx || !self._bgmPlaying) return;
+      self.resume();
+      var o = self._ctx.createOscillator();
+      o.type = 'sine';
+      o.frequency.value = 80;
+      o.frequency.exponentialRampToValueAtTime(30, self._ctx.currentTime + 0.1);
+      var g = self._ctx.createGain();
+      g.gain.value = 0.25 * self.bgmVolume;
+      g.gain.exponentialRampToValueAtTime(0.001, self._ctx.currentTime + 0.15);
+      o.connect(g);
+      g.connect(self._masterVol);
+      o.start();
+      o.stop(self._ctx.currentTime + 0.15);
+    }, 400);
+
+    // ハイハット風ノイズリズム
+    this._bgmHatId = setInterval(function () {
+      if (!self._ctx || !self._bgmPlaying) return;
+      self._playNoise(0.03, 0.06 * self.bgmVolume);
+    }, 200);
   },
 
   stopBGM: function () {
@@ -185,7 +215,9 @@ var SoundSystem = {
       if (this._bgmOsc) { this._bgmOsc.stop(); this._bgmOsc = null; }
       if (this._bgmBass) { this._bgmBass.stop(); this._bgmBass = null; }
       if (this._bgmLfo) { this._bgmLfo.stop(); this._bgmLfo = null; }
+      if (this._bgmBassLfo) { this._bgmBassLfo.stop(); this._bgmBassLfo = null; }
     } catch (e) {}
     if (this._bgmRhythmId) { clearInterval(this._bgmRhythmId); this._bgmRhythmId = null; }
+    if (this._bgmHatId) { clearInterval(this._bgmHatId); this._bgmHatId = null; }
   },
 };
