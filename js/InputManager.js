@@ -28,12 +28,12 @@ class InputManager {
   _createPadButtons() {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
-    var mr = 32; // 移動ボタン半径
-    var ar = 30; // 攻撃ボタン半径
+    var mr = 70; // 移動ボタン半径
+    var ar = 65; // 攻撃ボタン半径
 
     // 左側: 十字移動ボタン
-    var dpadCx = 100, dpadCy = H - 100;
-    var dpadSpread = 52;
+    var dpadCx = 120, dpadCy = H - 130;
+    var dpadSpread = 80;
 
     return {
       // 移動 (左側)
@@ -43,10 +43,10 @@ class InputManager {
       down:  { x: dpadCx,              y: dpadCy + dpadSpread,  r: mr, label: '↓', key: 'down',  color: '#ffffff' },
 
       // 攻撃 (右側)
-      physical: { x: W - 180, y: H - 80,  r: ar, label: '物理', key: 'physical',    color: '#cc4444' },
-      magical:  { x: W - 100, y: H - 80,  r: ar, label: '魔法', key: 'magical',     color: '#4488ff' },
-      ultimate: { x: W - 140, y: H - 150, r: ar, label: '必殺', key: 'ultimate',    color: '#ffd700' },
-      autoBtn:  { x: W - 55,  y: H - 150, r: 22, label: 'AUTO', key: 'auto_toggle', color: '#44ff88' },
+      physical: { x: W - 250, y: H - 90,  r: ar, label: '物理', key: 'physical',    color: '#cc4444' },
+      magical:  { x: W - 100, y: H - 90,  r: ar, label: '魔法', key: 'magical',     color: '#4488ff' },
+      ultimate: { x: W - 175, y: H - 220, r: ar, label: '必殺', key: 'ultimate',    color: '#ffd700' },
+      autoBtn:  { x: W - 60,  y: H - 220, r: 45, label: 'AUTO', key: 'auto_toggle', color: '#44ff88' },
     };
   }
 
@@ -139,12 +139,12 @@ class InputManager {
     if (!this.virtualPadEnabled) return;
 
     // 十字キー中央のガイド
-    var dpadCx = 100, dpadCy = CONFIG.CANVAS_HEIGHT - 100;
+    var dpadCx = 120, dpadCy = CONFIG.CANVAS_HEIGHT - 130;
     ctx.save();
     ctx.globalAlpha = 0.2;
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(dpadCx, dpadCy, 14, 0, Math.PI * 2);
+    ctx.arc(dpadCx, dpadCy, 24, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
@@ -170,7 +170,7 @@ class InputManager {
       ctx.stroke();
 
       // ラベル
-      var fontSize = (name === 'autoBtn') ? 10 : (name.length > 3 ? 13 : 18);
+      var fontSize = (name === 'autoBtn') ? 18 : (name.length > 3 ? 22 : 28);
       ctx.font = 'bold ' + fontSize + 'px ' + CONFIG.FONT_FAMILY;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
