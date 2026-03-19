@@ -141,7 +141,7 @@ class InputManager {
     // 十字キー中央のガイド
     var dpadCx = 100, dpadCy = CONFIG.CANVAS_HEIGHT - 100;
     ctx.save();
-    ctx.globalAlpha = 0.08;
+    ctx.globalAlpha = 0.2;
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
     ctx.arc(dpadCx, dpadCy, 14, 0, Math.PI * 2);
@@ -158,13 +158,13 @@ class InputManager {
       ctx.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
 
       if (isActive) {
-        ctx.fillStyle = btn.color + '66';
+        ctx.fillStyle = btn.color + '99';
         ctx.fill();
         ctx.strokeStyle = btn.color;
       } else {
-        ctx.fillStyle = btn.color + '1a';
+        ctx.fillStyle = btn.color + '44';
         ctx.fill();
-        ctx.strokeStyle = btn.color + '66';
+        ctx.strokeStyle = btn.color + '99';
       }
       ctx.lineWidth = 2;
       ctx.stroke();
@@ -174,7 +174,7 @@ class InputManager {
       ctx.font = 'bold ' + fontSize + 'px ' + CONFIG.FONT_FAMILY;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = isActive ? '#ffffff' : (btn.color + 'aa');
+      ctx.fillStyle = isActive ? '#ffffff' : (btn.color + 'dd');
       ctx.fillText(btn.label, btn.x, btn.y);
 
       ctx.restore();

@@ -6,6 +6,9 @@
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 html, body {
@@ -28,34 +31,25 @@ html, body {
 
 #game-canvas {
   display: block;
-  image-rendering: pixelated;
-  image-rendering: crisp-edges;
 }
 
-/* フルスクリーンボタン */
 #fullscreen-btn {
   position: fixed;
-  top: 8px;
-  right: 8px;
-  z-index: 50;
-  background: rgba(255,255,255,0.15);
-  border: 1px solid rgba(255,255,255,0.3);
+  top: 6px;
+  right: 6px;
+  z-index: 200;
+  background: rgba(0,0,0,0.6);
+  border: 2px solid rgba(255,255,255,0.5);
   color: #fff;
-  font-size: 18px;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
+  font-size: 22px;
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
   cursor: pointer;
-  display: none;
+  line-height: 44px;
+  text-align: center;
 }
 
-@media (pointer: coarse) {
-  #fullscreen-btn {
-    display: block;
-  }
-}
-
-/* ローディング画面 */
 #loading-screen {
   position: fixed;
   top: 0; left: 0;
@@ -75,7 +69,7 @@ html, body {
 }
 
 #loading-screen h1 {
-  font-size: 40px;
+  font-size: 36px;
   font-weight: 700;
   background: linear-gradient(90deg, #ffd700, #ffaa44, #ffd700);
   -webkit-background-clip: text;
@@ -91,7 +85,7 @@ html, body {
 }
 
 #loading-bar-bg {
-  width: 240px;
+  width: 200px;
   height: 6px;
   background: #1a1a2e;
   border-radius: 3px;
@@ -112,12 +106,8 @@ html, body {
   margin-top: 12px;
 }
 
-/* safe area for notch phones */
 @supports (padding: env(safe-area-inset-left)) {
-  #game-container {
-    padding-left: env(safe-area-inset-left);
-    padding-right: env(safe-area-inset-right);
-    padding-top: env(safe-area-inset-top);
-    padding-bottom: env(safe-area-inset-bottom);
+  body {
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
   }
 }
