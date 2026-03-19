@@ -1,210 +1,143 @@
-// 入力管理システム（キーボード＋仮想パッド）
+// 入力管理システム（キーボード＋仮想パッド）トップダウン版
 class InputManager {
   constructor(canvas, getScale) {
     this.canvas = canvas;
-    this.getScale = getScale; // () => currentScale を返す関数
-
-    // キー状態
-    this._down = {};      // 現在押されているか
-    this._pressed = {};   // 今フレームで押されたか
-    this._downPrev = {};  // 前フレームの状態
-
-    // 仮想パッド表示フラグ
+    this.getScale = getScale;
+    this._down = {};
+    this._pressed = {};
+    this._downPrev = {};
     this.virtualPadEnabled = false;
+    this._activeTouches = {};
 
-    // 仮想パッドのアクティブなタッチ
-    this._activeTouches = {}; // touchId -> buttonName
-
-    // キーマッピング（物理キー → 論理名）
     this.keyMap = {
       'ArrowLeft':  'left',
       'ArrowRight': 'right',
-      'ArrowUp':    'jump',
-      ' ':          'jump',
-      'z':          'physical',
-      'Z':          'physical',
-      'x':          'magical',
-      'X':          'magical',
-      'a':          'auto_toggle',
-      'A':          'auto_toggle',
-      'v':          'ultimate',
-      'V':          'ultimate',
+      'ArrowUp':    'up',
+      'ArrowDown':  'down',
+      'w': 'up',   'W': 'up',
+      'a': 'left', 'A': 'left',
+      's': 'down', 'S': 'down',
+      'd': 'right','D': 'right',
+      'z': 'physical', 'Z': 'physical',
+      'x': 'magical',  'X': 'magical',
+      'v': 'ultimate', 'V': 'ultimate',
+      'q': 'auto_toggle', 'Q': 'auto_toggle',
     };
 
-    // 仮想パッドのボタン定義（Canvas座標）
     this.padButtons = this._createPadButtons();
-
-    // イベント登録
     this._bindKeyboard();
     this._bindTouch();
   }
 
-  // 仮想パッドのボタン配置を生成
   _createPadButtons() {
-    const W = CONFIG.CANVAS_WIDTH;
-    const H = CONFIG.CANVAS_HEIGHT;
-    const r = 40; // 半径40px = 直径80px
-
+    var W = CONFIG.CANVAS_WIDTH;
+    var H = CONFIG.CANVAS_HEIGHT;
+    var r = 34;
     return {
-      // 左下: 移動パッド
-      left:  { x: 80,  y: H - 80,  r: r, label: '←', key: 'left' },
-      right: { x: 200, y: H - 80,  r: r, label: '→', key: 'right' },
-      jump:  { x: 140, y: H - 160, r: r, label: '↑', key: 'jump' },
-
-      // 右下: スキルボタン
-      physical: { x: W - 260, y: H - 80,  r: r, label: '物理', key: 'physical' },
-      magical:  { x: W - 140, y: H - 80,  r: r, label: '魔法', key: 'magical' },
-      autoBtn:  { x: W - 260, y: H - 160, r: r, label: 'AUTO', key: 'auto_toggle' },
-      ultimate: { x: W - 140, y: H - 160, r: r, label: '必殺', key: 'ultimate' },
+      left:     { x: 60,  y: H - 70,  r: r, label: '←',   key: 'left' },
+      right:    { x: 180, y: H - 70,  r: r, label: '→',   key: 'right' },
+      up:       { x: 120, y: H - 130, r: r, label: '↑',   key: 'up' },
+      down:     { x: 120, y: H - 10,  r: r, label: '↓',   key: 'down' },
+      physical: { x: W - 220, y: H - 70,  r: r, label: '物理', key: 'physical' },
+      magical:  { x: W - 120, y: H - 70,  r: r, label: '魔法', key: 'magical' },
+      autoBtn:  { x: W - 220, y: H - 140, r: r, label: 'AUTO', key: 'auto_toggle' },
+      ultimate: { x: W - 120, y: H - 140, r: r, label: '必殺', key: 'ultimate' },
     };
   }
-
-  // --- キーボード ---
 
   _bindKeyboard() {
-    window.addEventListener('keydown', (e) => {
-      const name = this.keyMap[e.key];
-      if (name) {
-        this._down[name] = true;
-        e.preventDefault();
-      }
+    var self = this;
+    window.addEventListener('keydown', function(e) {
+      var name = self.keyMap[e.key];
+      if (name) { self._down[name] = true; e.preventDefault(); }
     });
-
-    window.addEventListener('keyup', (e) => {
-      const name = this.keyMap[e.key];
-      if (name) {
-        this._down[name] = false;
-        e.preventDefault();
-      }
+    window.addEventListener('keyup', function(e) {
+      var name = self.keyMap[e.key];
+      if (name) { self._down[name] = false; e.preventDefault(); }
     });
   }
 
-  // --- タッチ（仮想パッド） ---
-
   _getCanvasPos(touch) {
-    const rect = this.canvas.getBoundingClientRect();
-    const scale = this.getScale();
-    return {
-      x: (touch.clientX - rect.left) / scale,
-      y: (touch.clientY - rect.top) / scale,
-    };
+    var rect = this.canvas.getBoundingClientRect();
+    var scale = this.getScale();
+    return { x: (touch.clientX - rect.left) / scale, y: (touch.clientY - rect.top) / scale };
   }
 
   _hitTestPad(x, y) {
     if (!this.virtualPadEnabled) return null;
-    for (const name in this.padButtons) {
-      const btn = this.padButtons[name];
-      const dx = x - btn.x;
-      const dy = y - btn.y;
-      if (dx * dx + dy * dy <= btn.r * btn.r) {
-        return btn.key;
-      }
+    for (var name in this.padButtons) {
+      var btn = this.padButtons[name];
+      var dx = x - btn.x, dy = y - btn.y;
+      if (dx * dx + dy * dy <= btn.r * btn.r) return btn.key;
     }
     return null;
   }
 
   _bindTouch() {
-    this.canvas.addEventListener('touchstart', (e) => {
-      if (!this.virtualPadEnabled) return;
-      for (const touch of e.changedTouches) {
-        const pos = this._getCanvasPos(touch);
-        const key = this._hitTestPad(pos.x, pos.y);
-        if (key) {
-          this._activeTouches[touch.identifier] = key;
-          this._down[key] = true;
-        }
+    var self = this;
+    this.canvas.addEventListener('touchstart', function(e) {
+      if (!self.virtualPadEnabled) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var t = e.changedTouches[i];
+        var pos = self._getCanvasPos(t);
+        var key = self._hitTestPad(pos.x, pos.y);
+        if (key) { self._activeTouches[t.identifier] = key; self._down[key] = true; }
       }
     }, { passive: true });
-
-    this.canvas.addEventListener('touchmove', (e) => {
-      if (!this.virtualPadEnabled) return;
-      for (const touch of e.changedTouches) {
-        const pos = this._getCanvasPos(touch);
-        const prevKey = this._activeTouches[touch.identifier];
-        const newKey = this._hitTestPad(pos.x, pos.y);
-
-        // 指がボタン間を移動した場合
-        if (prevKey && prevKey !== newKey) {
-          this._down[prevKey] = false;
-        }
-        if (newKey) {
-          this._activeTouches[touch.identifier] = newKey;
-          this._down[newKey] = true;
-        } else {
-          delete this._activeTouches[touch.identifier];
-        }
+    this.canvas.addEventListener('touchmove', function(e) {
+      if (!self.virtualPadEnabled) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var t = e.changedTouches[i];
+        var pos = self._getCanvasPos(t);
+        var prev = self._activeTouches[t.identifier];
+        var nk = self._hitTestPad(pos.x, pos.y);
+        if (prev && prev !== nk) self._down[prev] = false;
+        if (nk) { self._activeTouches[t.identifier] = nk; self._down[nk] = true; }
+        else delete self._activeTouches[t.identifier];
       }
     }, { passive: true });
-
-    const onTouchEnd = (e) => {
-      if (!this.virtualPadEnabled) return;
-      for (const touch of e.changedTouches) {
-        const key = this._activeTouches[touch.identifier];
-        if (key) {
-          this._down[key] = false;
-          delete this._activeTouches[touch.identifier];
-        }
+    var onEnd = function(e) {
+      if (!self.virtualPadEnabled) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var t = e.changedTouches[i];
+        var key = self._activeTouches[t.identifier];
+        if (key) { self._down[key] = false; delete self._activeTouches[t.identifier]; }
       }
     };
-
-    this.canvas.addEventListener('touchend', onTouchEnd, { passive: true });
-    this.canvas.addEventListener('touchcancel', onTouchEnd, { passive: true });
+    this.canvas.addEventListener('touchend', onEnd, { passive: true });
+    this.canvas.addEventListener('touchcancel', onEnd, { passive: true });
   }
 
-  // --- 毎フレーム呼ぶ ---
-
-  // フレーム先頭で呼ぶ: pressed判定の更新
   update() {
-    for (const key in this._down) {
+    for (var key in this._down) {
       this._pressed[key] = this._down[key] && !this._downPrev[key];
     }
-    // 前フレーム状態を保存
-    for (const key in this._down) {
-      this._downPrev[key] = this._down[key];
+    for (var key2 in this._down) {
+      this._downPrev[key2] = this._down[key2];
     }
   }
 
-  // 押している間 true
-  isKeyDown(key) {
-    return !!this._down[key];
-  }
-
-  // 押した瞬間だけ true
-  isKeyPressed(key) {
-    return !!this._pressed[key];
-  }
-
-  // --- 仮想パッド描画 ---
+  isKeyDown(key)    { return !!this._down[key]; }
+  isKeyPressed(key) { return !!this._pressed[key]; }
 
   renderVirtualPad(ctx) {
     if (!this.virtualPadEnabled) return;
-
-    for (const name in this.padButtons) {
-      const btn = this.padButtons[name];
-      const isActive = this.isKeyDown(btn.key);
-
+    for (var name in this.padButtons) {
+      var btn = this.padButtons[name];
+      var isActive = this.isKeyDown(btn.key);
       ctx.save();
-
-      // 円形ボタン
       ctx.beginPath();
       ctx.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
-      ctx.fillStyle = isActive
-        ? 'rgba(255, 255, 255, 0.35)'
-        : 'rgba(255, 255, 255, 0.12)';
+      ctx.fillStyle = isActive ? 'rgba(255,255,255,0.35)' : 'rgba(255,255,255,0.12)';
       ctx.fill();
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+      ctx.strokeStyle = 'rgba(255,255,255,0.5)';
       ctx.lineWidth = 2;
       ctx.stroke();
-
-      // ラベル
-      ctx.font = 'bold 22px ' + CONFIG.FONT_FAMILY;
+      ctx.font = 'bold 16px ' + CONFIG.FONT_FAMILY;
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = isActive
-        ? 'rgba(255, 255, 255, 0.9)'
-        : 'rgba(255, 255, 255, 0.6)';
+      ctx.fillStyle = isActive ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.6)';
       ctx.fillText(btn.label, btn.x, btn.y);
-
       ctx.restore();
     }
   }

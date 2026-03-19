@@ -173,7 +173,7 @@ class DropItem {
     this.y = y;
     this.vx = (Math.random() - 0.5) * 80;
     this.vy = -150 - Math.random() * 80;
-    this.groundY = CONFIG.BATTLE_GROUND_Y - 6;
+    this.groundY = this.y + 40;
     this.size = this.tier >= 2 ? 8 : 6;
 
     // 状態

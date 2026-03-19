@@ -5,9 +5,9 @@ const CONFIG = {
   FPS: 60,
   FONT_FAMILY: '"Noto Sans JP", sans-serif',
 
-  // バトル
-  BATTLE_GROUND_Y: 420,
-  PLAYER_SPEED: 300,         // px/sec
-  GRAVITY: 1500,             // px/sec²
-  PLAYER_JUMP_FORCE: -600,   // px/sec（上向き負）
+  // バトル（トップダウン）
+  PLAYER_SPEED: 180,         // px/sec
+  FIELD_W: 960,
+  FIELD_H: 540,
+  ATTACK_RANGE: 60,          // 通常攻撃の射程
 };
