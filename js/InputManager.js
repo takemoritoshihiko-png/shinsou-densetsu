@@ -65,7 +65,17 @@ class InputManager {
   _getCanvasPos(touch) {
     var rect = this.canvas.getBoundingClientRect();
     var scale = this.getScale();
-    return { x: (touch.clientX - rect.left) / scale, y: (touch.clientY - rect.top) / scale };
+    var cx = (touch.clientX - rect.left) / scale;
+    var cy = (touch.clientY - rect.top) / scale;
+    // 縦向き強制横向きモード: タッチ座標を90度回転
+    if (window._forceLandscape && window.innerHeight > window.innerWidth) {
+      var rw = rect.width, rh = rect.height;
+      var rawX = touch.clientX - rect.left;
+      var rawY = touch.clientY - rect.top;
+      cx = (rawY / rh) * CONFIG.CANVAS_WIDTH;
+      cy = (1 - rawX / rw) * CONFIG.CANVAS_HEIGHT;
+    }
+    return { x: cx, y: cy };
   }
 
   _hitTestPad(x, y) {
@@ -85,99 +95,3 @@ class InputManager {
       e.preventDefault();
       for (var i = 0; i < e.changedTouches.length; i++) {
         var t = e.changedTouches[i];
-        var pos = self._getCanvasPos(t);
-        var key = self._hitTestPad(pos.x, pos.y);
-        if (key) {
-          self._activeTouches[t.identifier] = key;
-          self._down[key] = true;
-        }
-      }
-    }, { passive: false });
-
-    this.canvas.addEventListener('touchmove', function(e) {
-      if (!self.virtualPadEnabled) return;
-      e.preventDefault();
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        var t = e.changedTouches[i];
-        var pos = self._getCanvasPos(t);
-        var prev = self._activeTouches[t.identifier];
-        var nk = self._hitTestPad(pos.x, pos.y);
-        if (prev && prev !== nk) self._down[prev] = false;
-        if (nk) { self._activeTouches[t.identifier] = nk; self._down[nk] = true; }
-        else if (prev) { delete self._activeTouches[t.identifier]; }
-      }
-    }, { passive: false });
-
-    var onEnd = function(e) {
-      if (!self.virtualPadEnabled) return;
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        var t = e.changedTouches[i];
-        var key = self._activeTouches[t.identifier];
-        if (key) {
-          self._down[key] = false;
-          delete self._activeTouches[t.identifier];
-        }
-      }
-    };
-    this.canvas.addEventListener('touchend', onEnd, { passive: true });
-    this.canvas.addEventListener('touchcancel', onEnd, { passive: true });
-  }
-
-  update() {
-    for (var key in this._down) {
-      this._pressed[key] = this._down[key] && !this._downPrev[key];
-    }
-    for (var key2 in this._down) {
-      this._downPrev[key2] = this._down[key2];
-    }
-  }
-
-  isKeyDown(key) { return !!this._down[key]; }
-  isKeyPressed(key) { return !!this._pressed[key]; }
-
-  renderVirtualPad(ctx) {
-    if (!this.virtualPadEnabled) return;
-
-    // 十字キー中央のガイド
-    var dpadCx = 120, dpadCy = CONFIG.CANVAS_HEIGHT - 130;
-    ctx.save();
-    ctx.globalAlpha = 0.2;
-    ctx.fillStyle = '#ffffff';
-    ctx.beginPath();
-    ctx.arc(dpadCx, dpadCy, 24, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.restore();
-
-    // 全ボタン描画
-    for (var name in this.padButtons) {
-      var btn = this.padButtons[name];
-      var isActive = this.isKeyDown(btn.key);
-
-      ctx.save();
-      ctx.beginPath();
-      ctx.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
-
-      if (isActive) {
-        ctx.fillStyle = btn.color + '99';
-        ctx.fill();
-        ctx.strokeStyle = btn.color;
-      } else {
-        ctx.fillStyle = btn.color + '44';
-        ctx.fill();
-        ctx.strokeStyle = btn.color + '99';
-      }
-      ctx.lineWidth = 2;
-      ctx.stroke();
-
-      // ラベル
-      var fontSize = (name === 'autoBtn') ? 18 : (name.length > 3 ? 22 : 28);
-      ctx.font = 'bold ' + fontSize + 'px ' + CONFIG.FONT_FAMILY;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = isActive ? '#ffffff' : (btn.color + 'dd');
-      ctx.fillText(btn.label, btn.x, btn.y);
-
-      ctx.restore();
-    }
-  }
-}

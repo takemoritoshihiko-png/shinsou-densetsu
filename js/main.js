@@ -11,12 +11,22 @@
   // レスポンシブスケーリング
   let currentScale = 1;
 
+
   function resize() {
-    const scaleX = window.innerWidth / CONFIG.CANVAS_WIDTH;
-    const scaleY = window.innerHeight / CONFIG.CANVAS_HEIGHT;
+    var w = window.innerWidth;
+    var h = window.innerHeight;
+    var isPortrait = h > w;
+
+    // 縦向き強制横向きモードの場合、幅と高さを入れ替えて計算
+    if (isPortrait && window._forceLandscape) {
+      var tmp = w; w = h; h = tmp;
+    }
+
+    var scaleX = w / CONFIG.CANVAS_WIDTH;
+    var scaleY = h / CONFIG.CANVAS_HEIGHT;
     currentScale = Math.min(scaleX, scaleY);
 
-    const container = document.getElementById('game-container');
+    var container = document.getElementById('game-container');
     container.style.width = CONFIG.CANVAS_WIDTH * currentScale + 'px';
     container.style.height = CONFIG.CANVAS_HEIGHT * currentScale + 'px';
     canvas.style.width = CONFIG.CANVAS_WIDTH * currentScale + 'px';
@@ -201,6 +211,7 @@ sceneManager.register('saveload', new SaveLoadScene(sceneManager, gameState));
     var rect = canvas.getBoundingClientRect();
     var tx = (touch.clientX - rect.left) / currentScale;
     var ty = (touch.clientY - rect.top) / currentScale;
+if (window._forceLandscape && window.innerHeight > window.innerWidth) {      var rw = rect.width, rh = rect.height;      var rawX = touch.clientX - rect.left;      var rawY = touch.clientY - rect.top;      tx = (rawY / rh) * CONFIG.CANVAS_WIDTH;      ty = (1 - rawX / rw) * CONFIG.CANVAS_HEIGHT;    }
 
     // バトル中: パッドボタンに触れたらシーンタップを送らない
     if (inputManager.virtualPadEnabled) {
