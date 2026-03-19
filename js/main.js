@@ -191,19 +191,21 @@ SoundSystem.resume();
     sceneManager.handleTap(pos.x, pos.y);
   });
 
+
   canvas.addEventListener('touchstart', function (e) {
     SoundSystem.resume();
-    if (inputManager.virtualPadEnabled) {
-      e.preventDefault();
-      var pos0 = getCanvasPosition(e);
-      // ジョイスティックまたは攻撃ボタンに触れたら無視
-      if (inputManager._hitTestPad(pos0.x, pos0.y) || inputManager._isLeftSide(pos0.x)) {
-        return;
-      }
-    }
     e.preventDefault();
-    const pos = getCanvasPosition(e);
-    sceneManager.handleTap(pos.x, pos.y);
+    if (!e.touches || !e.touches[0]) return;
+    var touch = e.touches[0];
+    var rect = canvas.getBoundingClientRect();
+    var tx = (touch.clientX - rect.left) / currentScale;
+    var ty = (touch.clientY - rect.top) / currentScale;
+
+    // バトル中: パッドボタンに触れたらシーンタップを送らない
+    if (inputManager.virtualPadEnabled) {
+      if (inputManager._hitTestPad(tx, ty)) return;
+    }
+    sceneManager.handleTap(tx, ty);
   }, { passive: false });
 
   // ゲームループ
