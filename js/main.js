@@ -192,10 +192,12 @@ SoundSystem.resume();
   });
 
   canvas.addEventListener('touchstart', function (e) {
+    SoundSystem.resume();
     if (inputManager.virtualPadEnabled) {
-      const pos = getCanvasPosition(e);
-      if (inputManager._hitTestPad(pos.x, pos.y)) {
-        e.preventDefault();
+      e.preventDefault();
+      var pos0 = getCanvasPosition(e);
+      // ジョイスティックまたは攻撃ボタンに触れたら無視
+      if (inputManager._hitTestPad(pos0.x, pos0.y) || inputManager._isLeftSide(pos0.x)) {
         return;
       }
     }

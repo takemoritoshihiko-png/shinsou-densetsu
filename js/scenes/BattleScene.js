@@ -419,6 +419,7 @@ class BattleScene {
 
     // スキルUI
     if (this.skillSystem) this.skillSystem.renderSkillUI(ctx, this.autoEnabled);
+// モバイル仮想パッド    this.inputManager.renderVirtualPad(ctx);
 
     // 操作ヒント
 

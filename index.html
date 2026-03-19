@@ -2,7 +2,7 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">  <meta name="apple-mobile-web-app-capable" content="yes">  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  <meta name="mobile-web-app-capable" content="yes">  <meta name="screen-orientation" content="landscape">
   <meta name="description" content="神装伝説 - しんそうでんせつ - ブラウザで遊べるダークファンタジーRPG">
   <title>神装伝説</title>
   <link rel="stylesheet" href="./css/style.css">
@@ -16,6 +16,7 @@
     <div id="loading-text">読み込み中...</div>
   </div>
 
+  <button id="fullscreen-btn" onclick="toggleFullscreen()">⛶</button>
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
   </div>
@@ -78,6 +79,7 @@
     });
     // フォールバック: 3秒後に強制非表示
     setTimeout(hideLoading, 3000);
+// フルスクリーン切替    function toggleFullscreen() {      var el = document.documentElement;      if (!document.fullscreenElement && !document.webkitFullscreenElement) {        if (el.requestFullscreen) el.requestFullscreen();        else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();        if (screen.orientation && screen.orientation.lock) {          screen.orientation.lock("landscape").catch(function(){});        }      } else {        if (document.exitFullscreen) document.exitFullscreen();        else if (document.webkitExitFullscreen) document.webkitExitFullscreen();      }    }    window.toggleFullscreen = toggleFullscreen;
   </script>
 </body>
 </html>
