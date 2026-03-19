@@ -440,83 +440,122 @@ class EquipScene {
       ctx.fillText('なし', lx + 10, y);
     }
 
-    // --- スロット特性セクション ---
+    // --- スロット特性セクション (改善版) ---
     var slotSectionY = y + Math.max(1, (item.innateTraits ? item.innateTraits.length : 0)) * 24 + 20;
-    ctx.strokeStyle = 'rgba(255,255,255,0.1)';
+    ctx.strokeStyle = 'rgba(100,180,255,0.3)';
+    ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(lx, slotSectionY);
     ctx.lineTo(px + pw - 25, slotSectionY);
     ctx.stroke();
 
     slotSectionY += 18;
+    var upgMul = UpgradeSystem.getUpgradeMultiplier(item.upgradeLevel || 0);
     ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY;
     ctx.fillStyle = '#88ccff';
-    ctx.fillText('スロット (' + (item.slots ? item.slots.length : 0) + ')', lx, slotSectionY);
-
-    // スロット丸アイコン横並び
-    var circleY = slotSectionY;
-    var circleStartX = lx + 120;
-    var circleR = 8;
-    var circleGap = 24;
-    var maxSlots = 4;
-
-    for (var si = 0; si < maxSlots; si++) {
-      var cx3 = circleStartX + si * circleGap;
-      ctx.beginPath();
-      ctx.arc(cx3, circleY, circleR, 0, Math.PI * 2);
-      if (item.slots && si < item.slots.length) {
-        var slotColor = (item.slots[si]) ? SlotTraitData.getColor(item.slots[si].id) : '#333333';
-        ctx.fillStyle = slotColor;
-        ctx.fill();
-        ctx.strokeStyle = '#ffffff44';
-      } else {
-        ctx.fillStyle = '#333333';
-        ctx.fill();
-        ctx.strokeStyle = '#555555';
-      }
-      ctx.lineWidth = 1;
-      ctx.stroke();
+    ctx.fillText('スロット特性 (' + (item.slots ? item.slots.length : 0) + '個)', lx, slotSectionY);
+    if (item.upgradeLevel > 0) {
+      ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+      ctx.fillStyle = '#ffd700';
+      ctx.fillText('  強化+' + item.upgradeLevel + 'で効果UP', lx + 140, slotSectionY);
     }
 
-    // スロット特性詳細
-    slotSectionY += 24;
+    // スロット特性詳細 (大きなカード表示)
+    slotSectionY += 16;
+    var slotCardH = 42;
+    var slotCardGap = 4;
     if (item.slots && item.slots.length > 0) {
       for (var sj = 0; sj < item.slots.length; sj++) {
         var st = item.slots[sj];
+        var cardY = slotSectionY + sj * (slotCardH + slotCardGap);
+
+        if (!st) {
+          // 空スロット
+          ctx.fillStyle = 'rgba(50,50,50,0.4)';
+          ctx.strokeStyle = 'rgba(100,100,100,0.3)';
+          ctx.lineWidth = 1;
+          ctx.fillRect(lx + 4, cardY, pw - 54, slotCardH);
+          ctx.strokeRect(lx + 4, cardY, pw - 54, slotCardH);
+          ctx.font = '12px ' + CONFIG.FONT_FAMILY;
+          ctx.fillStyle = '#555555';
+          ctx.textAlign = 'center';
+          ctx.fillText('空スロット（再抽選の石で付与可能）', lx + 4 + (pw - 54) / 2, cardY + slotCardH / 2);
+          ctx.textAlign = 'left';
+          continue;
+        }
+
         var sDef = SlotTraitData.getDef(st.id);
         var sColor = SlotTraitData.getColor(st.id);
+        var sCat = sDef ? SlotTraitData.CATEGORIES[sDef.category] : null;
+
+        // カード背景
+        ctx.fillStyle = sColor + '15';
+        ctx.strokeStyle = sColor + '66';
+        ctx.lineWidth = 1.5;
+        ctx.fillRect(lx + 4, cardY, pw - 54, slotCardH);
+        ctx.strokeRect(lx + 4, cardY, pw - 54, slotCardH);
+
+        // 左: カラーバー
+        ctx.fillStyle = sColor;
+        ctx.fillRect(lx + 4, cardY, 4, slotCardH);
 
         // 丸アイコン
         ctx.beginPath();
-        ctx.arc(lx + 20, slotSectionY + sj * 22, 5, 0, Math.PI * 2);
+        ctx.arc(lx + 24, cardY + slotCardH / 2, 8, 0, Math.PI * 2);
         ctx.fillStyle = sColor;
         ctx.fill();
-
-        // ラベル + 値
-        ctx.font = '12px ' + CONFIG.FONT_FAMILY;
-        ctx.fillStyle = sColor;
+        ctx.font = 'bold 10px ' + CONFIG.FONT_FAMILY;
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.fillText('' + (sj + 1), lx + 24, cardY + slotCardH / 2);
         ctx.textAlign = 'left';
-        ctx.fillText(sDef.label + ' +' + st.value + sDef.unit, lx + 32, slotSectionY + sj * 22);
 
-        // 実効値（ステ%系のみ）
+        // 特性名 (大きく)
+        ctx.font = 'bold 15px ' + CONFIG.FONT_FAMILY;
+        ctx.fillStyle = sColor;
+        ctx.fillText(sDef ? sDef.label : '???', lx + 42, cardY + 14);
+
+        // 値 (強化反映)
+        var displayVal = Math.round(st.value * upgMul * 10) / 10;
+        ctx.font = 'bold 18px ' + CONFIG.FONT_FAMILY;
+        ctx.fillStyle = '#ffffff';
+        ctx.fillText('+' + displayVal + (sDef ? sDef.unit : ''), lx + 180, cardY + 14);
+
+        // 強化前の値（強化している場合のみ）
+        if (item.upgradeLevel > 0) {
+          ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+          ctx.fillStyle = '#888888';
+          ctx.fillText('(基礎: +' + st.value + ')', lx + 280, cardY + 14);
+        }
+
+        // カテゴリ
+        if (sCat) {
+          ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+          ctx.fillStyle = sColor + 'aa';
+          ctx.fillText(sCat.label, lx + 42, cardY + 32);
+        }
+
+        // 実効ステータス値
         var sMapping = {
           atk_pct: 'atk', matk_pct: 'matk', def_pct: 'def', mdef_pct: 'mdef',
           hp_pct: 'hp', spd_pct: 'spd', crit_pct: 'crit',
         };
         if (sMapping[st.key]) {
           var sBase = item.baseStats[sMapping[st.key]] || 0;
-          if (sBase > 0) {
+          var upgBase = Math.floor(sBase * upgMul);
+          if (upgBase > 0) {
             var sAdd = sMapping[st.key] === 'crit'
-              ? (sBase * st.value / 100).toFixed(1)
-              : Math.floor(sBase * st.value / 100);
-            ctx.fillStyle = '#666666';
-            ctx.font = '10px ' + CONFIG.FONT_FAMILY;
-            ctx.fillText('(実効: +' + sAdd + ')', lx + 220, slotSectionY + sj * 22);
+              ? (upgBase * displayVal / 100).toFixed(1)
+              : Math.floor(upgBase * displayVal / 100);
+            ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
+            ctx.fillStyle = '#44ff88';
+            ctx.fillText('実効: ' + sMapping[st.key].toUpperCase() + ' +' + sAdd, lx + 140, cardY + 32);
           }
         }
       }
     } else {
       ctx.font = '12px ' + CONFIG.FONT_FAMILY;
+      ctx.fillStyle = '#555555';
       ctx.fillStyle = '#555555';
       ctx.fillText('スロットなし', lx + 10, slotSectionY);
     }

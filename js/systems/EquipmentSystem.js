@@ -104,7 +104,7 @@ class EquipmentSystem {
   }
 
   // トレイト配列からステータスボーナスを加算
-  _applyTraitBonuses(bonus, traitList, baseStats) {
+  _applyTraitBonuses(bonus, traitList, baseStats, upgMul) {
     if (!traitList) return;
     for (var t = 0; t < traitList.length; t++) {
       var tr = traitList[t];
@@ -112,7 +112,8 @@ class EquipmentSystem {
       var statKey = this._STAT_PCT_MAP[tr.key];
       if (statKey) {
         var baseVal = baseStats[statKey] || 0;
-        var addVal = baseVal * tr.value / 100;
+        var boostedValue = tr.value * (upgMul || 1);
+        var addVal = baseVal * boostedValue / 100;
         if (statKey === 'crit') {
           bonus[statKey] = Math.round((bonus[statKey] + addVal) * 10) / 10;
         } else {
@@ -139,9 +140,9 @@ class EquipmentSystem {
       bonus[keys[i]] = upgradedBase[keys[i]];
     }
     // 第1層: 固有特性（強化後の基礎ステに対して%計算）
-    this._applyTraitBonuses(bonus, item.innateTraits, upgradedBase);
+    this._applyTraitBonuses(bonus, item.innateTraits, upgradedBase, upgMul);
     // 第2層: スロット特性（同上）
-    this._applyTraitBonuses(bonus, item.slots, upgradedBase);
+    this._applyTraitBonuses(bonus, item.slots, upgradedBase, upgMul);
     return bonus;
   }
 
