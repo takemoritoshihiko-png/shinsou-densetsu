@@ -13,18 +13,28 @@ class SkillSystem {
     // アクティブバフ一覧 [{ stat, percent, remaining }]
     this.activeBuffs = [];
 
+    // グローバルクールダウン（連射防止）
+    this._globalCD = 0;
+    this._globalCDMax = 0.3; // 秒
+
     // 元ステータスバックアップ（バフ解除用）
     this._baseStats = {};
 
     // エフェクトリスト（BattleSceneが描画する）
     this.effects = [];
+    this._globalCD = 0;
   }
 
   reset() {
     this.cooldowns = { skill1: 0, skill2: 0, skill3: 0, ultimate: 0 };
     this.gauge = 0;
     this.activeBuffs = [];
+
+    // グローバルクールダウン（連射防止）
+    this._globalCD = 0;
+    this._globalCDMax = 0.3; // 秒
     this.effects = [];
+    this._globalCD = 0;
     this._baseStats = {};
   }
 
@@ -35,6 +45,7 @@ class SkillSystem {
 
   // スキルが使用可能か判定
   canUse(slot) {
+// グローバルCD中は使用不可    if (this._globalCD > 0) return false;
     var skill = SkillData.getBySlot(this.player.job, slot);
     if (!skill) return false;
 
@@ -76,6 +87,7 @@ class SkillSystem {
     // クールダウン設定
     if (skill.cooldown) {
       this.cooldowns[slot] = skill.cooldown;
+this._globalCD = this._globalCDMax;
     }
 
     var result = { hits: [], heal: 0, knockback: skill.knockback || 0 };
@@ -179,6 +191,9 @@ class SkillSystem {
   update(dt) {
     var sec = dt / 1000;
 
+    // グローバルクールダウン減算
+    if (this._globalCD > 0) this._globalCD = Math.max(0, this._globalCD - sec);
+
     // クールダウン減少
     for (var slot in this.cooldowns) {
       if (this.cooldowns[slot] > 0) {
@@ -278,6 +293,7 @@ class SkillSystem {
 
   // 通常攻撃 (スキルなし)
   _doBasicAttack(enemies, useMagic) {
+if (this._globalCD > 0) return null;    this._globalCD = this._globalCDMax;
     var p = this.player;
     var pcx = p.x + p.width / 2;
     var result = { hits: [], heal: 0, knockback: 0 };
@@ -293,7 +309,7 @@ class SkillSystem {
 
       if (dist < nearestDist) { nearestDist = dist; nearest = enemies[i]; }
     }
-    if (!nearest || nearestDist > (useMagic ? 120 : 80)) return null;
+    if (!nearest || nearestDist > (useMagic ? 120 : 80)) return null;    if (useMagic) {      if (p.mp < 3) return null;      p.mp -= 3;    }
     var idx = enemies.indexOf(nearest);
     var baseStat = useMagic ? p.matk : p.atk;
     var defStat = useMagic ? nearest.mdef : nearest.def;

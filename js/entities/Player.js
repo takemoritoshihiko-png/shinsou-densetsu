@@ -15,7 +15,7 @@ class Player {
 
     // 自動攻撃
     this.attackTimer = 0;
-    this.attackInterval = 0.8;
+    this.attackInterval = 1.0;
     this.attackRange = CONFIG.ATTACK_RANGE;
     this._enemies = [];
     this._onAttackCallback = null;
