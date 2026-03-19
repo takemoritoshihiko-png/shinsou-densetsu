@@ -111,8 +111,7 @@ class SkillSystem {
       var enemy = enemies[i];
       if (!enemy.alive) continue;
 
-      var ecx = enemy.x + enemy.width / 2;
-      var dist = Math.abs(pcx - ecx);
+      var ecx = enemy.x + enemy.width / 2;      var ecy = enemy.y + enemy.height / 2;      var pcy = p.y + p.height / 2;      var dist = Math.sqrt((pcx - ecx) * (pcx - ecx) + (pcy - ecy) * (pcy - ecy));
 
       if (isAll || dist <= range) {
         for (var h = 0; h < hitCount; h++) {
@@ -287,10 +286,14 @@ class SkillSystem {
     for (var i = 0; i < enemies.length; i++) {
       if (!enemies[i].alive) continue;
       var ecx = enemies[i].x + enemies[i].width / 2;
-      var dist = Math.abs(pcx - ecx);
+      var ecy = enemies[i].y + enemies[i].height / 2;
+      var pcy = p.y + p.height / 2;
+      var dist = Math.sqrt((pcx - ecx) * (pcx - ecx) + (pcy - ecy) * (pcy - ecy));
+
+
       if (dist < nearestDist) { nearestDist = dist; nearest = enemies[i]; }
     }
-    if (!nearest || nearestDist > (useMagic ? 200 : 80)) return null;
+    if (!nearest || nearestDist > (useMagic ? 120 : 80)) return null;
     var idx = enemies.indexOf(nearest);
     var baseStat = useMagic ? p.matk : p.atk;
     var defStat = useMagic ? nearest.mdef : nearest.def;
@@ -300,119 +303,40 @@ class SkillSystem {
     if (isCrit) dmg *= 1.5;
     dmg = Math.max(1, Math.floor(dmg));
     result.hits.push({ enemyIndex: idx, damage: dmg, critical: isCrit });
-    this.addGauge(dmg);
-    return result;
+    this.addGauge(dmg);    if (useMagic && nearest) {      var ex = nearest.x + nearest.width / 2;      var ey = nearest.y + nearest.height / 2;      this.effects.push(new SkillEffect(ex, ey, "burst", "#4488ff", false));    }    return result;
   }
 
 
-  // --- 新スキルボタンUI描画 (物理/魔法/必殺 + AUTO) ---
+
+
+  // --- HUD表示のみ（正方形ボタンなし） ---
   renderSkillUI(ctx, autoEnabled) {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
-    var p = this.player;
-    var btnSize = 56;
-    var gap = 10;
-    var btnY = H - btnSize - 55;
-    var startX = W - (btnSize * 3 + gap * 2) - 20;
-
-    var buttons = [
-      { label: '物理', subLabel: '[Z]', type: 'physical', color: '#cc4444' },
-      { label: '魔法', subLabel: '[X]', type: 'magical', color: '#4488ff' },
-      { label: '必殺', subLabel: '[V]', type: 'ultimate', color: '#ffd700' },
-    ];
-
-    for (var i = 0; i < buttons.length; i++) {
-      var btn = buttons[i];
-      var bx = startX + i * (btnSize + gap);
-      var usable = false;
-
-      if (btn.type === 'physical') {
-        usable = !!this.findBestPhysical([]) || true; // basic attack always available
-      } else if (btn.type === 'magical') {
-        usable = !!this.findBestMagical([]) || p.matk > 0;
-      } else if (btn.type === 'ultimate') {
-        var ultSkill = SkillData.getBySlot(p.job, 'ultimate');
-        var classLv = p.getClassLevel();
-        var locked = !ultSkill || classLv < ultSkill.unlockLevel;
-        usable = !locked && this.gauge >= (ultSkill ? ultSkill.gaugeCost || 100 : 100);
-      }
-
-      ctx.save();
-      // Button background
-      if (usable) {
-        ctx.fillStyle = btn.color + '33';
-        ctx.strokeStyle = btn.color;
-      } else {
-        ctx.fillStyle = 'rgba(60,60,60,0.5)';
-        ctx.strokeStyle = 'rgba(100,100,100,0.4)';
-      }
-      ctx.lineWidth = 2;
-      ctx.fillRect(bx, btnY, btnSize, btnSize);
-      ctx.strokeRect(bx, btnY, btnSize, btnSize);
-
-      // Label
-      ctx.font = 'bold 16px ' + CONFIG.FONT_FAMILY;
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
-      ctx.fillStyle = usable ? '#ffffff' : '#666666';
-      ctx.fillText(btn.label, bx + btnSize / 2, btnY + btnSize / 2 - 6);
-
-      // Sub label
-      ctx.font = '11px ' + CONFIG.FONT_FAMILY;
-      ctx.fillStyle = usable ? '#aaaaaa' : '#555555';
-      ctx.fillText(btn.subLabel, bx + btnSize / 2, btnY + btnSize / 2 + 12);
-
-      // Ultimate gauge overlay
-      if (btn.type === 'ultimate' && !usable) {
-        var ultSkill2 = SkillData.getBySlot(p.job, 'ultimate');
-        if (ultSkill2 && p.getClassLevel() >= ultSkill2.unlockLevel) {
-          var gRatio = this.gauge / this.gaugeMax;
-          ctx.fillStyle = 'rgba(0,0,0,0.4)';
-          ctx.fillRect(bx, btnY, btnSize, btnSize * (1 - gRatio));
-        }
-      }
-
-      ctx.restore();
-    }
-
-    // AUTO toggle button
-    var autoBtnX = startX - btnSize - gap;
-    ctx.save();
-    ctx.fillStyle = autoEnabled ? 'rgba(0,200,100,0.25)' : 'rgba(60,60,60,0.5)';
-    ctx.strokeStyle = autoEnabled ? '#44ff88' : 'rgba(100,100,100,0.4)';
-    ctx.lineWidth = 2;
-    ctx.fillRect(autoBtnX, btnY, btnSize, btnSize);
-    ctx.strokeRect(autoBtnX, btnY, btnSize, btnSize);
-    ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = autoEnabled ? '#44ff88' : '#666666';
-    ctx.fillText('AUTO', autoBtnX + btnSize / 2, btnY + btnSize / 2 - 6);
-    ctx.font = '10px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = autoEnabled ? '#88ffaa' : '#555555';
-    ctx.fillText(autoEnabled ? 'ON' : 'OFF [A]', autoBtnX + btnSize / 2, btnY + btnSize / 2 + 12);
-    ctx.restore();
-
-    // Gauge bar
-    var gaugeW = btnSize * 3 + gap * 2;
-    var gaugeH = 8;
-    var gaugeX = startX;
-    var gaugeY = btnY + btnSize + 4;
+    // ゲージバーのみ画面下部に表示
+    var gaugeW = 160, gaugeH = 8;
+    var gaugeX = W - gaugeW - 20, gaugeY = H - 18;
     var gaugeRatio = this.gauge / this.gaugeMax;
-
     ctx.fillStyle = '#222222';
     ctx.fillRect(gaugeX, gaugeY, gaugeW, gaugeH);
     ctx.fillStyle = this.gauge >= this.gaugeMax ? '#ffd700' : '#ff8844';
     ctx.fillRect(gaugeX, gaugeY, gaugeW * gaugeRatio, gaugeH);
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-    ctx.lineWidth = 1;
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
     ctx.strokeRect(gaugeX, gaugeY, gaugeW, gaugeH);
     ctx.font = '8px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('GAUGE ' + Math.floor(this.gauge) + '%', gaugeX + gaugeW / 2, gaugeY + gaugeH / 2);
+    ctx.fillText('必殺ゲージ ' + Math.floor(this.gauge) + '%', gaugeX + gaugeW / 2, gaugeY + gaugeH / 2);
+
+    // AUTO状態表示
+    if (autoEnabled) {
+      ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = '#44ff88';
+      ctx.fillText('AUTO ON', 20, H - 12);
+    }
   }
+
 
   // エフェクト描画
   renderEffects(ctx) {

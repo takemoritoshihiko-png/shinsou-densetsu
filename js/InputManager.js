@@ -38,10 +38,6 @@ class InputManager {
       right:    { x: 180, y: H - 70,  r: r, label: '→',   key: 'right' },
       up:       { x: 120, y: H - 130, r: r, label: '↑',   key: 'up' },
       down:     { x: 120, y: H - 10,  r: r, label: '↓',   key: 'down' },
-      physical: { x: W - 220, y: H - 70,  r: r, label: '物理', key: 'physical' },
-      magical:  { x: W - 120, y: H - 70,  r: r, label: '魔法', key: 'magical' },
-      autoBtn:  { x: W - 220, y: H - 140, r: r, label: 'AUTO', key: 'auto_toggle' },
-      ultimate: { x: W - 120, y: H - 140, r: r, label: '必殺', key: 'ultimate' },
     };
   }
 

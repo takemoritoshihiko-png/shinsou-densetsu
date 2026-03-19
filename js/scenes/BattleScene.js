@@ -420,7 +420,6 @@ class BattleScene {
     ctx.fillText('[Z]物理 [X]魔法 [V]必殺 [Q]AUTO  [矢印/WASD]移動', W - 20, 16);
 
     // 仮想パッド
-    this.inputManager.renderVirtualPad(ctx);
   }
 
   _renderBossHP(ctx, boss) {
