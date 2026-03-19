@@ -83,7 +83,7 @@ class BookSystem {
   }
 
   // 全アイテムキー一覧
-  ALL_ITEM_KEYS: [
+  ALL_ITEM_KEYS = [
     { key: 'hpPotion', name: 'HPポーション', color: '#44ff88', desc: 'HP 30%回復' },
     { key: 'mpPotion', name: 'MPポーション', color: '#4488ff', desc: 'MP 30%回復' },
     { key: 'rerollStone', name: '再抽選の石', color: '#44aaff', desc: 'スロット特性を再抽選' },
@@ -94,5 +94,5 @@ class BookSystem {
     { key: 'coreRare', name: 'レアコア', color: '#4488ff', desc: '装備+値強化' },
     { key: 'coreEpic', name: 'エピックコア', color: '#bb44ff', desc: '装備+値強化' },
     { key: 'coreLegend', name: 'レジェンドコア', color: '#ffd700', desc: '装備+値強化' },
-  ],
+  ];
 }
