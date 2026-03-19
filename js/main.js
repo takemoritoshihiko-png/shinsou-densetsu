@@ -117,8 +117,8 @@
   }
 
   // セーブデータからロード
-  function loadGame() {
-    var data = SaveSystem.load();
+  function loadGame(slotIndex) {
+    var data = SaveSystem.load(slotIndex !== undefined ? slotIndex : 0);
     if (!data) return false;
     SaveSystem.applyLoad(data, gameState);
     console.log('セーブデータをロードしました (Lv.' + player.level + ')');
@@ -126,12 +126,13 @@
   }
 
   // セーブ実行（どこからでも呼べるグローバル関数）
-  function saveGame() {
-    SaveSystem.save(gameState);
+  function saveGame(slotIndex) {
+    SaveSystem.save(gameState, slotIndex !== undefined ? slotIndex : 0);
   }
 
   // グローバルに公開（各シーンから呼べるように）
   window._saveGame = saveGame;
+window._gameState = gameState;
 
   // シーン管理の初期化
   const sceneManager = new SceneManager();
@@ -152,6 +153,7 @@
   sceneManager.register('battle', new BattleScene(sceneManager, inputManager, player, partySystem, equipSystem, bookSystem));
   sceneManager.register('result', new ResultScene(sceneManager));
   sceneManager.register('settings', new SettingsScene(sceneManager, gameState));
+sceneManager.register('saveload', new SaveLoadScene(sceneManager, gameState));
 
   // ステージセレクトへの参照をgameStateに保持
   gameState.stageSelectScene = sceneManager.scenes['stageSelect'];

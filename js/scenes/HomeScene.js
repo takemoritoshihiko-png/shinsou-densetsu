@@ -21,6 +21,8 @@ class HomeScene {
     ];
 
     this.settingsBtn = { x: startX + (bw+gx)*1, y: row2y, w: bw, h: bh };
+    this.saveBtn = { x: startX + (bw+gx)*2, y: row2y, w: bw, h: bh };
+    this.loadBtn = { x: startX + (bw+gx)*3, y: row2y, w: bw, h: bh };
     this.elapsed = 0;
   }
 
@@ -101,6 +103,7 @@ class HomeScene {
     ctx.fillText('⚙', sb.x + sb.w / 2, sb.y + 30);
     ctx.font = '12px ' + CONFIG.FONT_FAMILY;
     ctx.fillText('設定', sb.x + sb.w / 2, sb.y + 56);
+// セーブボタン    var svb = this.saveBtn;    ctx.fillStyle = 'rgba(255,255,255,0.04)';    ctx.strokeStyle = 'rgba(255,200,50,0.4)';    ctx.lineWidth = 1;    this._rr(ctx, svb.x, svb.y, svb.w, svb.h, 8);    ctx.font = '22px ' + CONFIG.FONT_FAMILY;    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';    ctx.fillStyle = '#ffd700';    ctx.fillText('💾', svb.x + svb.w / 2, svb.y + 30);    ctx.font = '12px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#888888';    ctx.fillText('セーブ', svb.x + svb.w / 2, svb.y + 56);    // ロードボタン    var ldb = this.loadBtn;    ctx.fillStyle = 'rgba(255,255,255,0.04)';    ctx.strokeStyle = 'rgba(68,170,255,0.4)';    ctx.lineWidth = 1;    this._rr(ctx, ldb.x, ldb.y, ldb.w, ldb.h, 8);    ctx.font = '22px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#44aaff';    ctx.fillText('📂', ldb.x + ldb.w / 2, ldb.y + 30);    ctx.font = '12px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#888888';    ctx.fillText('ロード', ldb.x + ldb.w / 2, ldb.y + 56);
   }
 
   _renderPlayerBar(ctx, W) {
@@ -227,6 +230,7 @@ class HomeScene {
       this.sceneManager.changeScene('settings');
       return;
     }
+// セーブボタン    var svb = this.saveBtn;    if (x >= svb.x && x <= svb.x + svb.w && y >= svb.y && y <= svb.y + svb.h) {      var scene = this.sceneManager.scenes["saveload"];      if (scene) scene.mode = "save";      this.sceneManager.changeScene("saveload");      return;    }    // ロードボタン    var ldb = this.loadBtn;    if (x >= ldb.x && x <= ldb.x + ldb.w && y >= ldb.y && y <= ldb.y + ldb.h) {      var scene2 = this.sceneManager.scenes["saveload"];      if (scene2) scene2.mode = "load";      this.sceneManager.changeScene("saveload");      return;    }
   }
 
   exit() {}

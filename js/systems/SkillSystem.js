@@ -15,7 +15,7 @@ class SkillSystem {
 
     // グローバルクールダウン（連射防止）
     this._globalCD = 0;
-    this._globalCDMax = 0.3; // 秒
+    this._globalCDMax = 0.4; // 秒
 
     // 元ステータスバックアップ（バフ解除用）
     this._baseStats = {};
@@ -32,7 +32,7 @@ class SkillSystem {
 
     // グローバルクールダウン（連射防止）
     this._globalCD = 0;
-    this._globalCDMax = 0.3; // 秒
+    this._globalCDMax = 0.4; // 秒
     this.effects = [];
     this._globalCD = 0;
     this._baseStats = {};
