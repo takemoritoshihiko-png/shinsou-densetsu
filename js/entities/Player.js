@@ -162,12 +162,12 @@ class Player {
       }
     }
 
-    // 自動攻撃処理
-    this.attackTimer += sec;
-    if (this.attackTimer >= this.attackInterval) {
-      this._tryAutoAttack();
-      this.attackTimer = 0;
-    }
+//     // 自動攻撃処理
+//     this.attackTimer += sec;
+//     if (this.attackTimer >= this.attackInterval) {
+//       this._tryAutoAttack();
+//       this.attackTimer = 0;
+//     }
 
     // 左右移動
     this.vx = 0;

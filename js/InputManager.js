@@ -21,12 +21,12 @@ class InputManager {
       'ArrowRight': 'right',
       'ArrowUp':    'jump',
       ' ':          'jump',
-      'z':          'skill1',
-      'Z':          'skill1',
-      'x':          'skill2',
-      'X':          'skill2',
-      'c':          'skill3',
-      'C':          'skill3',
+      'z':          'physical',
+      'Z':          'physical',
+      'x':          'magical',
+      'X':          'magical',
+      'a':          'auto_toggle',
+      'A':          'auto_toggle',
       'v':          'ultimate',
       'V':          'ultimate',
     };
@@ -52,10 +52,10 @@ class InputManager {
       jump:  { x: 140, y: H - 160, r: r, label: '↑', key: 'jump' },
 
       // 右下: スキルボタン
-      skill1:   { x: W - 260, y: H - 80,  r: r, label: 'Z',  key: 'skill1' },
-      skill2:   { x: W - 140, y: H - 80,  r: r, label: 'X',  key: 'skill2' },
-      skill3:   { x: W - 260, y: H - 160, r: r, label: 'C',  key: 'skill3' },
-      ultimate: { x: W - 140, y: H - 160, r: r, label: 'V',  key: 'ultimate' },
+      physical: { x: W - 260, y: H - 80,  r: r, label: '物理', key: 'physical' },
+      magical:  { x: W - 140, y: H - 80,  r: r, label: '魔法', key: 'magical' },
+      autoBtn:  { x: W - 260, y: H - 160, r: r, label: 'AUTO', key: 'auto_toggle' },
+      ultimate: { x: W - 140, y: H - 160, r: r, label: '必殺', key: 'ultimate' },
     };
   }
 

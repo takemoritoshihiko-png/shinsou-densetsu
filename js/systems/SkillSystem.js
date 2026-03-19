@@ -204,109 +204,197 @@ class SkillSystem {
     }
   }
 
-  // --- スキルボタンUI描画 ---
-  renderSkillUI(ctx) {
+  // 職業が物理型か魔法型かを判定
+  isPhysicalJob() {
+    var magicJobs = ['mage', 'priest'];
+    return magicJobs.indexOf(this.player.job) < 0;
+  }
+
+  // 物理攻撃: 使える最強の物理スキルを選ぶ。なければ通常攻撃
+  findBestPhysical(enemies) {
+    var skills = SkillData.getSkills(this.player.job);
+    var classLv = this.player.getClassLevel();
+    var best = null;
+    var bestMul = 0;
+    for (var i = 0; i < skills.length; i++) {
+      var sk = skills[i];
+      if (sk.slot === 'ultimate') continue;
+      if (sk.type === 'buff' || sk.type === 'heal') continue;
+      if (sk.useMATK) continue;
+      if (classLv < sk.unlockLevel) continue;
+      if (this.cooldowns[sk.slot] > 0) continue;
+      if (sk.mpCost && this.player.mp < sk.mpCost) continue;
+      var totalMul = (sk.multiplier || 1) * (sk.hits || 1);
+      if (totalMul > bestMul) { bestMul = totalMul; best = sk; }
+    }
+    return best; // null = 通常攻撃にフォールバック
+  }
+
+  // 魔法攻撃: 使える最強の魔法/回復/バフスキルを選ぶ
+  findBestMagical(enemies) {
+    var skills = SkillData.getSkills(this.player.job);
+    var classLv = this.player.getClassLevel();
+    var best = null;
+    var bestPriority = -1;
+    for (var i = 0; i < skills.length; i++) {
+      var sk = skills[i];
+      if (sk.slot === 'ultimate') continue;
+      if (classLv < sk.unlockLevel) continue;
+      if (this.cooldowns[sk.slot] > 0) continue;
+      if (sk.mpCost && this.player.mp < sk.mpCost) continue;
+      var priority = 0;
+      if (sk.type === 'heal' || sk.healPercent) {
+        if (this.player.hp < this.player.hpMax * 0.7) priority = 100;
+        else continue;
+      } else if (sk.type === 'buff') {
+        priority = 50;
+      } else if (sk.useMATK || sk.type === 'magical') {
+        priority = 10 + (sk.multiplier || 1) * (sk.hits || 1);
+      } else {
+        priority = 5 + (sk.multiplier || 1) * (sk.hits || 1);
+      }
+      if (priority > bestPriority) { bestPriority = priority; best = sk; }
+    }
+    return best;
+  }
+
+  // オート攻撃で使うべき攻撃タイプ
+  getAutoAttackType() {
+    return this.isPhysicalJob() ? 'physical' : 'magical';
+  }
+
+  // 物理攻撃を実行 (スキルまたは通常攻撃)
+  usePhysical(enemies) {
+    var skill = this.findBestPhysical(enemies);
+    if (skill) return this.use(skill.slot, enemies);
+    return this._doBasicAttack(enemies, false);
+  }
+
+  // 魔法攻撃を実行
+  useMagical(enemies) {
+    var skill = this.findBestMagical(enemies);
+    if (skill) return this.use(skill.slot, enemies);
+    return this._doBasicAttack(enemies, true);
+  }
+
+  // 通常攻撃 (スキルなし)
+  _doBasicAttack(enemies, useMagic) {
+    var p = this.player;
+    var pcx = p.x + p.width / 2;
+    var result = { hits: [], heal: 0, knockback: 0 };
+    var nearest = null;
+    var nearestDist = Infinity;
+    for (var i = 0; i < enemies.length; i++) {
+      if (!enemies[i].alive) continue;
+      var ecx = enemies[i].x + enemies[i].width / 2;
+      var dist = Math.abs(pcx - ecx);
+      if (dist < nearestDist) { nearestDist = dist; nearest = enemies[i]; }
+    }
+    if (!nearest || nearestDist > (useMagic ? 200 : 80)) return null;
+    var idx = enemies.indexOf(nearest);
+    var baseStat = useMagic ? p.matk : p.atk;
+    var defStat = useMagic ? nearest.mdef : nearest.def;
+    var reduction = defStat / (defStat + 100);
+    var dmg = baseStat * (1 - reduction) * (0.9 + Math.random() * 0.2);
+    var isCrit = Math.random() * 100 < p.crit;
+    if (isCrit) dmg *= 1.5;
+    dmg = Math.max(1, Math.floor(dmg));
+    result.hits.push({ enemyIndex: idx, damage: dmg, critical: isCrit });
+    this.addGauge(dmg);
+    return result;
+  }
+
+
+  // --- 新スキルボタンUI描画 (物理/魔法/必殺 + AUTO) ---
+  renderSkillUI(ctx, autoEnabled) {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
     var p = this.player;
-    var classLv = p.getClassLevel();
-    var slots = ['skill1', 'skill2', 'skill3', 'ultimate'];
-    var keys = ['Z', 'X', 'C', 'V'];
-    var btnSize = 50;
-    var gap = 8;
-    var startX = W - (btnSize * 4 + gap * 3) - 20;
+    var btnSize = 56;
+    var gap = 10;
     var btnY = H - btnSize - 55;
+    var startX = W - (btnSize * 3 + gap * 2) - 20;
 
-    for (var i = 0; i < slots.length; i++) {
-      var slot = slots[i];
-      var skill = SkillData.getBySlot(p.job, slot);
+    var buttons = [
+      { label: '物理', subLabel: '[Z]', type: 'physical', color: '#cc4444' },
+      { label: '魔法', subLabel: '[X]', type: 'magical', color: '#4488ff' },
+      { label: '必殺', subLabel: '[V]', type: 'ultimate', color: '#ffd700' },
+    ];
+
+    for (var i = 0; i < buttons.length; i++) {
+      var btn = buttons[i];
       var bx = startX + i * (btnSize + gap);
-      var usable = this.canUse(slot);
-      var locked = !skill || classLv < skill.unlockLevel;
-      var onCooldown = this.cooldowns[slot] > 0;
-      var noMp = skill && slot !== 'ultimate' && skill.mpCost && p.mp < skill.mpCost;
-      var noGauge = slot === 'ultimate' && skill && this.gauge < (skill.gaugeCost || 100);
+      var usable = false;
+
+      if (btn.type === 'physical') {
+        usable = !!this.findBestPhysical([]) || true; // basic attack always available
+      } else if (btn.type === 'magical') {
+        usable = !!this.findBestMagical([]) || p.matk > 0;
+      } else if (btn.type === 'ultimate') {
+        var ultSkill = SkillData.getBySlot(p.job, 'ultimate');
+        var classLv = p.getClassLevel();
+        var locked = !ultSkill || classLv < ultSkill.unlockLevel;
+        usable = !locked && this.gauge >= (ultSkill ? ultSkill.gaugeCost || 100 : 100);
+      }
 
       ctx.save();
-
-      // ボタン背景
-      if (locked) {
-        ctx.fillStyle = 'rgba(60, 60, 60, 0.5)';
-        ctx.strokeStyle = 'rgba(100, 100, 100, 0.4)';
-      } else if (!usable) {
-        ctx.fillStyle = 'rgba(80, 80, 80, 0.5)';
-        ctx.strokeStyle = 'rgba(120, 120, 120, 0.5)';
+      // Button background
+      if (usable) {
+        ctx.fillStyle = btn.color + '33';
+        ctx.strokeStyle = btn.color;
       } else {
-        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
-        ctx.strokeStyle = skill ? (skill.effectColor + '88') : 'rgba(255, 255, 255, 0.5)';
+        ctx.fillStyle = 'rgba(60,60,60,0.5)';
+        ctx.strokeStyle = 'rgba(100,100,100,0.4)';
       }
       ctx.lineWidth = 2;
       ctx.fillRect(bx, btnY, btnSize, btnSize);
       ctx.strokeRect(bx, btnY, btnSize, btnSize);
 
-      // キーラベル
-      ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY;
+      // Label
+      ctx.font = 'bold 16px ' + CONFIG.FONT_FAMILY;
       ctx.textAlign = 'center';
-      ctx.textBaseline = 'top';
+      ctx.textBaseline = 'middle';
       ctx.fillStyle = usable ? '#ffffff' : '#666666';
-      ctx.fillText(keys[i], bx + btnSize / 2, btnY + 4);
+      ctx.fillText(btn.label, bx + btnSize / 2, btnY + btnSize / 2 - 6);
 
-      // スキル名（短縮）
-      if (skill && !locked) {
-        ctx.font = '9px ' + CONFIG.FONT_FAMILY;
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = usable ? '#cccccc' : '#555555';
-        var shortName = skill.name.length > 5 ? skill.name.substring(0, 5) + '..' : skill.name;
-        ctx.fillText(shortName, bx + btnSize / 2, btnY + btnSize / 2 + 2);
-      }
+      // Sub label
+      ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+      ctx.fillStyle = usable ? '#aaaaaa' : '#555555';
+      ctx.fillText(btn.subLabel, bx + btnSize / 2, btnY + btnSize / 2 + 12);
 
-      // クールダウン表示
-      if (onCooldown) {
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-        ctx.fillRect(bx, btnY, btnSize, btnSize);
-
-        ctx.font = 'bold 18px ' + CONFIG.FONT_FAMILY;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#ff8888';
-        ctx.fillText(Math.ceil(this.cooldowns[slot]) + 's', bx + btnSize / 2, btnY + btnSize / 2);
-      }
-
-      // MP不足表示
-      if (!onCooldown && noMp && !locked) {
-        ctx.font = '10px ' + CONFIG.FONT_FAMILY;
-        ctx.textBaseline = 'bottom';
-        ctx.textAlign = 'center';
-        ctx.fillStyle = '#ff4444';
-        ctx.fillText('MP不足', bx + btnSize / 2, btnY + btnSize - 2);
-      }
-
-      // 必殺技ゲージ不足
-      if (slot === 'ultimate' && !locked && noGauge && !onCooldown) {
-        // ゲージ量をオーバーレイ
-        var gRatio = this.gauge / this.gaugeMax;
-        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
-        ctx.fillRect(bx, btnY, btnSize, btnSize * (1 - gRatio));
-      }
-
-      // ロック表示
-      if (locked) {
-        ctx.font = '10px ' + CONFIG.FONT_FAMILY;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = '#555555';
-        if (skill) {
-          ctx.fillText('Lv.' + skill.unlockLevel, bx + btnSize / 2, btnY + btnSize / 2);
-        } else {
-          ctx.fillText('---', bx + btnSize / 2, btnY + btnSize / 2);
+      // Ultimate gauge overlay
+      if (btn.type === 'ultimate' && !usable) {
+        var ultSkill2 = SkillData.getBySlot(p.job, 'ultimate');
+        if (ultSkill2 && p.getClassLevel() >= ultSkill2.unlockLevel) {
+          var gRatio = this.gauge / this.gaugeMax;
+          ctx.fillStyle = 'rgba(0,0,0,0.4)';
+          ctx.fillRect(bx, btnY, btnSize, btnSize * (1 - gRatio));
         }
       }
 
       ctx.restore();
     }
 
-    // --- 必殺技ゲージバー ---
-    var gaugeW = btnSize * 4 + gap * 3;
+    // AUTO toggle button
+    var autoBtnX = startX - btnSize - gap;
+    ctx.save();
+    ctx.fillStyle = autoEnabled ? 'rgba(0,200,100,0.25)' : 'rgba(60,60,60,0.5)';
+    ctx.strokeStyle = autoEnabled ? '#44ff88' : 'rgba(100,100,100,0.4)';
+    ctx.lineWidth = 2;
+    ctx.fillRect(autoBtnX, btnY, btnSize, btnSize);
+    ctx.strokeRect(autoBtnX, btnY, btnSize, btnSize);
+    ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = autoEnabled ? '#44ff88' : '#666666';
+    ctx.fillText('AUTO', autoBtnX + btnSize / 2, btnY + btnSize / 2 - 6);
+    ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+    ctx.fillStyle = autoEnabled ? '#88ffaa' : '#555555';
+    ctx.fillText(autoEnabled ? 'ON' : 'OFF [A]', autoBtnX + btnSize / 2, btnY + btnSize / 2 + 12);
+    ctx.restore();
+
+    // Gauge bar
+    var gaugeW = btnSize * 3 + gap * 2;
     var gaugeH = 8;
     var gaugeX = startX;
     var gaugeY = btnY + btnSize + 4;
@@ -314,15 +402,11 @@ class SkillSystem {
 
     ctx.fillStyle = '#222222';
     ctx.fillRect(gaugeX, gaugeY, gaugeW, gaugeH);
-
-    var gColor = this.gauge >= this.gaugeMax ? '#ffd700' : '#ff8844';
-    ctx.fillStyle = gColor;
+    ctx.fillStyle = this.gauge >= this.gaugeMax ? '#ffd700' : '#ff8844';
     ctx.fillRect(gaugeX, gaugeY, gaugeW * gaugeRatio, gaugeH);
-
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+    ctx.strokeStyle = 'rgba(255,255,255,0.3)';
     ctx.lineWidth = 1;
     ctx.strokeRect(gaugeX, gaugeY, gaugeW, gaugeH);
-
     ctx.font = '8px ' + CONFIG.FONT_FAMILY;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
@@ -338,7 +422,6 @@ class SkillSystem {
   }
 }
 
-// スキルエフェクト
 class SkillEffect {
   constructor(x, y, type, color, fullscreen) {
     this.x = x;

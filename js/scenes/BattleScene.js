@@ -25,6 +25,11 @@ class BattleScene {
     this.endTimer = 0;
     this.endDelay = 1500;
     this.endResult = '';
+
+    // オート攻撃
+    this.autoEnabled = false;
+    this.autoTimer = 0;
+    this.autoInterval = 1000; // ms
   }
 
   enter() {
@@ -40,6 +45,7 @@ class BattleScene {
     this.battleEnded = false;
     this.endTimer = 0;
     this.endResult = '';
+    this.autoTimer = 0;
 
     // スキルシステム初期化
     this.skillSystem = new SkillSystem(this.player);
@@ -122,13 +128,33 @@ class BattleScene {
       return;
     }
 
-    // --- スキル入力処理 ---
-    var skillSlots = ['skill1', 'skill2', 'skill3', 'ultimate'];
-    for (var s = 0; s < skillSlots.length; s++) {
-      var slot = skillSlots[s];
-      if (this.inputManager.isKeyPressed(slot)) {
-        this._useSkill(slot);
+    // --- 攻撃入力処理 (物理/魔法/必殺 + オートトグル) ---
+    if (this.inputManager.isKeyPressed("auto_toggle")) {
+      this.autoEnabled = !this.autoEnabled;
+      this.autoTimer = 0;
+    }
+    if (this.inputManager.isKeyPressed("physical")) {
+      this._useAttack("physical");
+    }
+    if (this.inputManager.isKeyPressed("magical")) {
+      this._useAttack("magical");
+    }
+    if (this.inputManager.isKeyPressed("ultimate")) {
+      this._useAttack("ultimate");
+    }
+    // オート攻撃
+    if (this.autoEnabled && this.skillSystem) {
+      this.autoTimer += dt;
+      if (this.autoTimer >= this.autoInterval) {
+        this.autoTimer = 0;
+        var autoType = this.skillSystem.getAutoAttackType();
+        this._useAttack(autoType);
+        // ゲージ満タンなら必殺技も自動発動
+        if (this.skillSystem.gauge >= this.skillSystem.gaugeMax) {
+          this._useAttack("ultimate");
+        }
       }
+    }
     }
 
     // 敵の更新
@@ -162,6 +188,49 @@ class BattleScene {
 
     this._updateDamageNumbers(dt);
     this._updateDropItems(dt);
+  }
+
+  _useAttack(type) {
+    if (!this.skillSystem) return;
+    var result = null;
+    if (type === "physical") {
+      result = this.skillSystem.usePhysical(this.enemies);
+    } else if (type === "magical") {
+      result = this.skillSystem.useMagical(this.enemies);
+    } else if (type === "ultimate") {
+      result = this.skillSystem.use("ultimate", this.enemies);
+    }
+    if (!result) return;
+    this._applySkillResult(result);
+  }
+
+  _applySkillResult(result) {
+    for (var h = 0; h < result.hits.length; h++) {
+      var hit = result.hits[h];
+      var enemy = this.enemies[hit.enemyIndex];
+      if (!enemy || !enemy.alive) continue;
+      var killed = enemy.takeDamage(hit.damage);
+      var ecx = enemy.x + enemy.width / 2;
+      this.damageNumbers.push(new DamageNumber(ecx, enemy.y - 10, hit.damage, hit.critical));
+      if (this.skillSystem) this.skillSystem.addGauge(hit.damage);
+      if (result.knockback && enemy.alive) enemy.x += result.knockback;
+      if (killed) {
+        this.player.addReward(enemy.exp, enemy.gold);
+        var ups = LevelSystem.gainExp(this.player, enemy.exp);
+        if (ups > 0) {
+          this.levelUpEffects.push(
+            new LevelUpEffect(this.player.x + this.player.width / 2, this.player.y)
+          );
+        }
+        this._spawnDrops(enemy, ecx, enemy.y + enemy.height / 2);
+        if (this.bookSystem && enemy._bookId) this.bookSystem.registerMonsterKill(enemy._bookId);
+      }
+    }
+    if (result.heal > 0) {
+      this.damageNumbers.push(
+        new DamageNumber(this.player.x + this.player.width / 2, this.player.y - 10, "+" + result.heal, false)
+      );
+    }
   }
 
   _useSkill(slot) {
@@ -518,14 +587,14 @@ class BattleScene {
 
     // --- スキルボタンUI ---
     if (this.skillSystem) {
-      this.skillSystem.renderSkillUI(ctx);
+      this.skillSystem.renderSkillUI(ctx, this.autoEnabled);
     }
 
     // --- 操作ヒント ---
     ctx.font = '12px ' + CONFIG.FONT_FAMILY;
     ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
     ctx.textAlign = 'right';
-    ctx.fillText('[Z]スキル1 [X]スキル2 [C]スキル3 [V]必殺技  [←→]移動 [↑/Space]ジャンプ', W - 20, 20);
+    ctx.fillText('[Z]物理攻撃 [X]魔法攻撃 [V]必殺技 [A]オート  [←→]移動 [↑]ジャンプ', W - 20, 20);
 
     // --- 仮想パッド ---
     this.inputManager.renderVirtualPad(ctx);
