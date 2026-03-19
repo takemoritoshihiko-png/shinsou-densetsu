@@ -57,6 +57,9 @@ class BattleScene {
     }, this.currentWorld, this.currentStage);
     this.waveManager.start();
 
+    // BGM開始
+    SoundSystem.startBattleBGM();
+
     // フィールド装飾を生成
     this._generateField();
   }
@@ -123,7 +126,7 @@ class BattleScene {
           self.player.addReward(enemy.exp, enemy.gold);
           var ups = LevelSystem.gainExp(self.player, enemy.exp);
           if (ups > 0) {
-            self.levelUpEffects.push(new LevelUpEffect(self.player.x + self.player.width / 2, self.player.y));
+            SoundSystem.playLevelUp(); self.levelUpEffects.push(new LevelUpEffect(self.player.x + self.player.width / 2, self.player.y));
           }
           var ecx = enemy.x + enemy.width / 2;
           self._spawnDrops(enemy, ecx, enemy.y + enemy.height / 2);
@@ -186,8 +189,11 @@ class BattleScene {
     if (!this.skillSystem) return;
     var result = null;
     if (type === 'physical') result = this.skillSystem.usePhysical(this.enemies);
+    if (result) SoundSystem.playPhysicalAttack();
     else if (type === 'magical') result = this.skillSystem.useMagical(this.enemies);
+    if (result) SoundSystem.playMagicalAttack();
     else if (type === 'ultimate') result = this.skillSystem.use('ultimate', this.enemies);
+    if (result) SoundSystem.playUltimate();
     if (!result) return;
     this._applySkillResult(result);
   }
@@ -206,7 +212,7 @@ class BattleScene {
         this.player.addReward(enemy.exp, enemy.gold);
         var ups = LevelSystem.gainExp(this.player, enemy.exp);
         if (ups > 0) {
-          this.levelUpEffects.push(new LevelUpEffect(this.player.x + this.player.width / 2, this.player.y));
+          SoundSystem.playLevelUp(); this.levelUpEffects.push(new LevelUpEffect(this.player.x + this.player.width / 2, this.player.y));
         }
         this._spawnDrops(enemy, ecx, enemy.y + enemy.height / 2);
         if (this.bookSystem && enemy._bookId) this.bookSystem.registerMonsterKill(enemy._bookId);
@@ -232,6 +238,7 @@ class BattleScene {
       }
       if (drop.type === 'gold') continue;
       this.dropItems.push(new DropItem(x, y, drop));
+// ドロップ音      if (drop.type === "equipment" && drop.rank) SoundSystem.playDrop(drop.rank);      else if (drop.type === "core" && drop.rank) SoundSystem.playDrop(drop.rank);      else SoundSystem.playDropCommon();
       var tier = DropSystem.getDropTier(drop);
       if (tier >= 2) this.rareDropEffects.push(new RareDropEffect(tier));
     }
@@ -414,10 +421,6 @@ class BattleScene {
     if (this.skillSystem) this.skillSystem.renderSkillUI(ctx, this.autoEnabled);
 
     // 操作ヒント
-    ctx.font = '11px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = 'rgba(255,255,255,0.4)';
-    ctx.textAlign = 'right';
-    ctx.fillText('[Z]物理 [X]魔法 [V]必殺 [Q]AUTO  [矢印/WASD]移動', W - 20, 16);
 
     // 仮想パッド
   }
@@ -464,5 +467,5 @@ class BattleScene {
   }
 
   onTap(x, y) {}
-  exit() { this.inputManager.virtualPadEnabled = false; }
+  exit() { this.inputManager.virtualPadEnabled = false; SoundSystem.stopBGM(); }
 }

@@ -325,34 +325,102 @@ if (this._globalCD > 0) return null;    this._globalCD = this._globalCDMax;
 
 
 
-  // --- HUD表示のみ（正方形ボタンなし） ---
+
+  // --- 操作ガイド付きHUD ---
   renderSkillUI(ctx, autoEnabled) {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
-    // ゲージバーのみ画面下部に表示
-    var gaugeW = 160, gaugeH = 8;
-    var gaugeX = W - gaugeW - 20, gaugeY = H - 18;
-    var gaugeRatio = this.gauge / this.gaugeMax;
-    ctx.fillStyle = '#222222';
-    ctx.fillRect(gaugeX, gaugeY, gaugeW, gaugeH);
-    ctx.fillStyle = this.gauge >= this.gaugeMax ? '#ffd700' : '#ff8844';
-    ctx.fillRect(gaugeX, gaugeY, gaugeW * gaugeRatio, gaugeH);
-    ctx.strokeStyle = 'rgba(255,255,255,0.3)'; ctx.lineWidth = 1;
-    ctx.strokeRect(gaugeX, gaugeY, gaugeW, gaugeH);
-    ctx.font = '8px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText('必殺ゲージ ' + Math.floor(this.gauge) + '%', gaugeX + gaugeW / 2, gaugeY + gaugeH / 2);
 
-    // AUTO状態表示
-    if (autoEnabled) {
-      ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
+    // 下部パネル背景
+    var panelH = 48;
+    var panelY = H - panelH;
+    ctx.fillStyle = 'rgba(0,0,0,0.55)';
+    ctx.fillRect(0, panelY, W, panelH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.15)';
+    ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(0, panelY); ctx.lineTo(W, panelY); ctx.stroke();
+
+    // 操作ボタンガイド（丸型アイコン+ラベル）
+    var btns = [
+      { key: 'Z', label: '物理攻撃', color: '#cc4444', usable: true },
+      { key: 'X', label: '魔法攻撃', color: '#4488ff', usable: this.player.mp >= 3 },
+      { key: 'V', label: '必殺技',   color: '#ffd700', usable: this.gauge >= this.gaugeMax },
+      { key: 'Q', label: autoEnabled ? 'AUTO ON' : 'AUTO OFF', color: autoEnabled ? '#44ff88' : '#888888', usable: true },
+    ];
+
+    var btnStartX = 20;
+    var btnGap = 8;
+    for (var i = 0; i < btns.length; i++) {
+      var b = btns[i];
+      var bx = btnStartX + i * 155;
+      var by = panelY + 8;
+      var bw = 148;
+      var bh = 32;
+
+      // 背景
+      ctx.fillStyle = b.usable ? (b.color + '22') : 'rgba(40,40,40,0.5)';
+      ctx.strokeStyle = b.usable ? b.color : 'rgba(80,80,80,0.5)';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(bx + 4, by); ctx.lineTo(bx + bw - 4, by);
+      ctx.quadraticCurveTo(bx + bw, by, bx + bw, by + 4);
+      ctx.lineTo(bx + bw, by + bh - 4);
+      ctx.quadraticCurveTo(bx + bw, by + bh, bx + bw - 4, by + bh);
+      ctx.lineTo(bx + 4, by + bh);
+      ctx.quadraticCurveTo(bx, by + bh, bx, by + bh - 4);
+      ctx.lineTo(bx, by + 4);
+      ctx.quadraticCurveTo(bx, by, bx + 4, by);
+      ctx.closePath();
+      ctx.fill(); ctx.stroke();
+
+      // キー丸アイコン
+      var circX = bx + 18;
+      var circY = by + bh / 2;
+      ctx.beginPath(); ctx.arc(circX, circY, 11, 0, Math.PI * 2);
+      ctx.fillStyle = b.usable ? b.color : '#555555';
+      ctx.fill();
+      ctx.font = 'bold 13px ' + CONFIG.FONT_FAMILY;
+      ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+      ctx.fillStyle = '#ffffff';
+      ctx.fillText(b.key, circX, circY);
+
+      // ラベル
+      ctx.font = 'bold 13px ' + CONFIG.FONT_FAMILY;
       ctx.textAlign = 'left';
-      ctx.fillStyle = '#44ff88';
-      ctx.fillText('AUTO ON', 20, H - 12);
+      ctx.fillStyle = b.usable ? '#ffffff' : '#666666';
+      ctx.fillText(b.label, bx + 34, circY);
     }
-  }
 
+    // 必殺ゲージバー（4番目ボタンの右）
+    var gaugeX = btnStartX + 4 * 155 + 10;
+    var gaugeW = W - gaugeX - 20;
+    var gaugeH = 10;
+    var gaugeY = panelY + 12;
+    var gaugeRatio = this.gauge / this.gaugeMax;
+
+    ctx.font = '9px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#aaaaaa';
+    ctx.fillText('必殺ゲージ', gaugeX, gaugeY - 2);
+
+    ctx.fillStyle = '#1a1a2e';
+    ctx.fillRect(gaugeX, gaugeY + 6, gaugeW, gaugeH);
+    ctx.fillStyle = this.gauge >= this.gaugeMax ? '#ffd700' : '#ff8844';
+    ctx.fillRect(gaugeX, gaugeY + 6, gaugeW * gaugeRatio, gaugeH);
+    ctx.strokeStyle = 'rgba(255,255,255,0.25)'; ctx.lineWidth = 1;
+    ctx.strokeRect(gaugeX, gaugeY + 6, gaugeW, gaugeH);
+
+    ctx.font = 'bold 8px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'center';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(Math.floor(this.gauge) + '%', gaugeX + gaugeW / 2, gaugeY + 6 + gaugeH / 2);
+
+    // MP残量
+    ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'left';
+    ctx.fillStyle = '#4488ff';
+    ctx.fillText('MP: ' + this.player.mp + '/' + this.player.mpMax, gaugeX, panelY + 38);
+  }
 
   // エフェクト描画
   renderEffects(ctx) {
