@@ -40,12 +40,13 @@ class SkillSystem {
 
   // 与ダメージ時にゲージ加算
   addGauge(damage) {
-    this.gauge = Math.min(this.gaugeMax, this.gauge + damage / 10);
+    this.gauge = Math.min(this.gaugeMax, this.gauge + damage / 5);
   }
 
   // スキルが使用可能か判定
   canUse(slot) {
-// グローバルCD中は使用不可    if (this._globalCD > 0) return false;
+    // グローバルCD中は使用不可
+    if (this._globalCD > 0) return false;
     var skill = SkillData.getBySlot(this.player.job, slot);
     if (!skill) return false;
 
@@ -87,8 +88,13 @@ class SkillSystem {
     // クールダウン設定
     if (skill.cooldown) {
       this.cooldowns[slot] = skill.cooldown;
-this._globalCD = this._globalCDMax;
     }
+    this._globalCD = this._globalCDMax;
+
+
+
+
+
 
     var result = { hits: [], heal: 0, knockback: skill.knockback || 0 };
 
@@ -319,7 +325,13 @@ if (this._globalCD > 0) return null;    this._globalCD = this._globalCDMax;
     if (isCrit) dmg *= 1.5;
     dmg = Math.max(1, Math.floor(dmg));
     result.hits.push({ enemyIndex: idx, damage: dmg, critical: isCrit });
-    this.addGauge(dmg);    if (useMagic && nearest) {      var ex = nearest.x + nearest.width / 2;      var ey = nearest.y + nearest.height / 2;      this.effects.push(new SkillEffect(ex, ey, "burst", "#4488ff", false));    }    return result;
+    this.addGauge(dmg);
+    if (useMagic && nearest) {
+      var ex = nearest.x + nearest.width / 2;
+      var ey = nearest.y + nearest.height / 2;
+      this.effects.push(new SkillEffect(ex, ey, "burst", "#4488ff", false));
+    }
+    return result;
   }
 
 
@@ -344,7 +356,7 @@ if (this._globalCD > 0) return null;    this._globalCD = this._globalCDMax;
     var btns = [
       { key: 'Z', label: '物理攻撃', color: '#cc4444', usable: true },
       { key: 'X', label: '魔法攻撃', color: '#4488ff', usable: this.player.mp >= 3 },
-      { key: 'V', label: '必殺技',   color: '#ffd700', usable: this.gauge >= this.gaugeMax },
+      { key: 'C', label: '必殺技',   color: '#ffd700', usable: this.gauge >= this.gaugeMax },
       { key: 'Q', label: autoEnabled ? 'AUTO ON' : 'AUTO OFF', color: autoEnabled ? '#44ff88' : '#888888', usable: true },
     ];
 

@@ -29,7 +29,7 @@ var SkillData = {
       desc: '前方にATK×3.5＋ノックバック',
     },
     {
-      slot: 'ultimate', name: 'レイジングストーム', unlockLevel: 50,
+      slot: 'ultimate', name: 'レイジングストーム', unlockLevel: 1,
       type: 'ultimate', target: 'all',
       multiplier: 5.0, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',
@@ -61,7 +61,7 @@ var SkillData = {
       desc: '5連撃 ATK×0.6×5',
     },
     {
-      slot: 'ultimate', name: '無影剣', unlockLevel: 50,
+      slot: 'ultimate', name: '無影剣', unlockLevel: 1,
       type: 'ultimate', target: 'all',
       multiplier: 0.5, hits: 10, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',
@@ -94,7 +94,7 @@ var SkillData = {
       desc: 'DEF+20%(5秒)',
     },
     {
-      slot: 'ultimate', name: '不落の城塞', unlockLevel: 50,
+      slot: 'ultimate', name: '不落の城塞', unlockLevel: 1,
       type: 'ultimate', target: 'self',
       healPercent: 30, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',
@@ -125,7 +125,7 @@ var SkillData = {
       desc: '範囲魔法 MATK×2.0',
     },
     {
-      slot: 'ultimate', name: 'メテオストライク', unlockLevel: 50,
+      slot: 'ultimate', name: 'メテオストライク', unlockLevel: 1,
       type: 'ultimate', target: 'all',
       multiplier: 3.5, useMATK: true, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',
@@ -158,7 +158,7 @@ var SkillData = {
       desc: 'MATK×1.8＋HP15%回復',
     },
     {
-      slot: 'ultimate', name: 'リザレクション', unlockLevel: 50,
+      slot: 'ultimate', name: 'リザレクション', unlockLevel: 1,
       type: 'ultimate', target: 'self',
       healPercent: 50, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',
@@ -189,7 +189,7 @@ var SkillData = {
       desc: 'ATK×2.0＋確定クリティカル',
     },
     {
-      slot: 'ultimate', name: 'レインオブアロー', unlockLevel: 50,
+      slot: 'ultimate', name: 'レインオブアロー', unlockLevel: 1,
       type: 'ultimate', target: 'all',
       multiplier: 2.5, gaugeCost: 100,
       effectColor: '#ffffff', effectType: 'fullscreen',

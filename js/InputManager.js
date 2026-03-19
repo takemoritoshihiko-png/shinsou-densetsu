@@ -16,7 +16,7 @@ class InputManager {
       's': 'down', 'S': 'down', 'd': 'right', 'D': 'right',
       'z': 'physical', 'Z': 'physical',
       'x': 'magical', 'X': 'magical',
-      'v': 'ultimate', 'V': 'ultimate',
+      'c': 'ultimate', 'C': 'ultimate',
       'q': 'auto_toggle', 'Q': 'auto_toggle',
     };
 
