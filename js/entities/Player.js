@@ -229,174 +229,167 @@ class Player {
     }
   }
 
+
   render(ctx) {
     var jobData = ClassData.get(this.job);
     var jc = jobData ? jobData.color : '#4488ff';
     var cx = this.x + this.width / 2;
-    var by = this.y + this.height; // bottom
-
-    // 装備色（装備中の武器/体のランク色）
-    var weaponColor = '#888888';
-    var armorColor = jc;
+    var by = this.y + this.height;
+    var faceDir = this.vx >= 0 ? 1 : -1;
+    var time = Date.now();
+    var isRunning = Math.abs(this.vx) > 10;
+    var isJumping = !this.grounded;
+    var bobY = isRunning ? Math.sin(time * 0.012) * 3 : Math.sin(time * 0.003) * 1;
+    var legPhase = isRunning ? Math.sin(time * 0.015) : 0;
+    var breathe = Math.sin(time * 0.003) * 0.5;
+    var weaponColor = '#888888', armorColor = jc, shieldColor = null, headColor = null, feetColor = '#6b5b3a';
+    var weaponRank = 'common';
     if (this.equipSystem) {
       var wep = this.equipSystem.getEquippedItem('weapon');
-      if (wep) weaponColor = EquipmentData.RANK_COLORS[wep.rank] || '#888';
+      if (wep) { weaponColor = EquipmentData.RANK_COLORS[wep.rank] || '#888'; weaponRank = wep.rank; }
       var bod = this.equipSystem.getEquippedItem('body');
       if (bod) armorColor = EquipmentData.RANK_COLORS[bod.rank] || jc;
+      var sh = this.equipSystem.getEquippedItem('shield');
+      if (sh) shieldColor = EquipmentData.RANK_COLORS[sh.rank] || '#888';
+      var hd = this.equipSystem.getEquippedItem('head');
+      if (hd) headColor = EquipmentData.RANK_COLORS[hd.rank] || '#666';
+      var ft = this.equipSystem.getEquippedItem('feet');
+      if (ft) feetColor = EquipmentData.RANK_COLORS[ft.rank] || '#6b5b3a';
     }
-
     ctx.save();
-
-    // 走りアニメーション
-    var bobY = 0;
-    var legPhase = 0;
-    if (Math.abs(this.vx) > 10) {
-      bobY = Math.sin(Date.now() * 0.012) * 2;
-      legPhase = Math.sin(Date.now() * 0.015);
-    }
-
-    // 影
+    // Shadow
+    var shadowScale = isJumping ? 0.5 : 1;
     ctx.fillStyle = 'rgba(0,0,0,0.25)';
     ctx.beginPath();
-    ctx.ellipse(cx, by + 2, 16, 4, 0, 0, Math.PI * 2);
+    ctx.ellipse(cx, CONFIG.BATTLE_GROUND_Y + 3, 18 * shadowScale, 5 * shadowScale, 0, 0, Math.PI * 2);
     ctx.fill();
-
-    // --- 足 ---
-    var legW = 6, legH = 14;
-    var leftLegX = cx - 8;
-    var rightLegX = cx + 2;
-    var legY = by - legH;
-
-    // 左足
-    ctx.fillStyle = '#555566';
-    ctx.fillRect(leftLegX, legY + legPhase * 3 + bobY, legW, legH - legPhase * 3);
-    // 右足
-    ctx.fillRect(rightLegX, legY - legPhase * 3 + bobY, legW, legH + legPhase * 3);
-
-    // 靴
-    var shoeColor = '#6b5b3a';
-    if (this.equipSystem) {
-      var ft = this.equipSystem.getEquippedItem('feet');
-      if (ft) shoeColor = EquipmentData.RANK_COLORS[ft.rank] || '#6b5b3a';
-    }
-    ctx.fillStyle = shoeColor;
-    ctx.fillRect(leftLegX - 1, by - 4 + bobY, legW + 3, 4);
-    ctx.fillRect(rightLegX - 1, by - 4 + bobY, legW + 3, 4);
-
-    // --- 体 ---
-    var bodyW = 22, bodyH = 22;
-    var bodyX = cx - bodyW / 2;
-    var bodyY = by - legH - bodyH + bobY;
-
-    // 鎧（体装備色）
+    var justAttacked = this.attackTimer < 0.08 && this.attackTimer > 0;
+    if (isRunning) { ctx.translate(cx, by); ctx.rotate(faceDir * 0.05); ctx.translate(-cx, -by); }
+    // Legs
+    var legW = 7, legH = 16, leftLegX = cx - 9, rightLegX = cx + 2, legY = by - legH;
+    var lKick = isJumping ? -6 : legPhase * 5, rKick = isJumping ? -6 : -legPhase * 5;
+    ctx.fillStyle = '#4a4a5a';
+    this._roundRect2(ctx, leftLegX, legY + lKick + bobY, legW, legH - lKick, 2);
+    this._roundRect2(ctx, rightLegX, legY + rKick + bobY, legW, legH - rKick, 2);
+    ctx.fillStyle = feetColor;
+    this._roundRect2(ctx, leftLegX - 1, by - 5 + bobY, legW + 3, 5, 2);
+    this._roundRect2(ctx, rightLegX - 1, by - 5 + bobY, legW + 3, 5, 2);
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
+    ctx.fillRect(leftLegX, by - 8 + bobY, legW + 1, 2);
+    ctx.fillRect(rightLegX, by - 8 + bobY, legW + 1, 2);
+    // Body
+    var bodyW = 26, bodyH = 24, bodyX = cx - bodyW / 2;
+    var bodyY = by - legH - bodyH + bobY + breathe;
     ctx.fillStyle = armorColor;
-    this._roundRect2(ctx, bodyX, bodyY, bodyW, bodyH, 3);
-
-    // ベルト
-    ctx.fillStyle = '#3a3322';
-    ctx.fillRect(bodyX, bodyY + bodyH - 5, bodyW, 4);
-
-    // 肩パッド
+    this._roundRect2(ctx, bodyX, bodyY, bodyW, bodyH, 4);
+    ctx.strokeStyle = 'rgba(255,255,255,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(cx - 6, bodyY + 4); ctx.lineTo(cx, bodyY + 12); ctx.lineTo(cx + 6, bodyY + 4); ctx.stroke();
+    ctx.fillStyle = '#3a3322'; ctx.fillRect(bodyX + 1, bodyY + bodyH - 6, bodyW - 2, 5);
+    ctx.fillStyle = '#ffcc44'; ctx.fillRect(cx - 3, bodyY + bodyH - 6, 6, 5);
+    // Shoulder pads
     ctx.fillStyle = armorColor;
-    ctx.beginPath();
-    ctx.arc(bodyX - 2, bodyY + 4, 5, 0, Math.PI * 2);
-    ctx.fill();
-    ctx.beginPath();
-    ctx.arc(bodyX + bodyW + 2, bodyY + 4, 5, 0, Math.PI * 2);
-    ctx.fill();
-
-    // --- 腕 ---
-    var armW = 5;
-    // 左腕
-    ctx.fillStyle = '#ddb89a';
-    ctx.fillRect(bodyX - armW - 2, bodyY + 6 + bobY, armW, 16);
-    // 右腕（武器持つ側）
-    ctx.fillRect(bodyX + bodyW + 2, bodyY + 4 + bobY, armW, 18);
-
-    // --- 頭 ---
-    var headR = 10;
-    var headY = bodyY - headR - 2 + bobY;
-
-    // 顔（肌色）
+    ctx.beginPath(); ctx.ellipse(bodyX - 1, bodyY + 5, 7, 5, -0.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bodyX + bodyW + 1, bodyY + 5, 7, 5, 0.2, 0, Math.PI * 2); ctx.fill();
+    // Arms
     ctx.fillStyle = '#f0c8a0';
-    ctx.beginPath();
-    ctx.arc(cx, headY, headR, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 髪の毛（職業色）
+    ctx.fillRect(bodyX - 7, bodyY + 8 + bobY, 6, 16);
+    ctx.fillRect(bodyX + bodyW + 1, bodyY + 6 + bobY, 6, 18);
+    // Shield
+    if (shieldColor) {
+      var shX = bodyX - 10, shY = bodyY + 9 + bobY;
+      ctx.fillStyle = shieldColor;
+      ctx.beginPath();
+      ctx.moveTo(shX + 6, shY); ctx.quadraticCurveTo(shX + 14, shY + 2, shX + 14, shY + 10);
+      ctx.quadraticCurveTo(shX + 12, shY + 20, shX + 6, shY + 22);
+      ctx.quadraticCurveTo(shX, shY + 20, shX - 2, shY + 10);
+      ctx.quadraticCurveTo(shX - 2, shY + 2, shX + 6, shY);
+      ctx.fill();
+      ctx.strokeStyle = 'rgba(255,255,255,0.4)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(shX + 6, shY + 4); ctx.lineTo(shX + 6, shY + 18);
+      ctx.moveTo(shX + 1, shY + 10); ctx.lineTo(shX + 11, shY + 10); ctx.stroke();
+    }
+    // Head
+    var headR = 13, headY2 = bodyY - headR - 1 + bobY;
+    ctx.fillStyle = '#f0c8a0';
+    ctx.beginPath(); ctx.arc(cx, headY2, headR, 0, Math.PI * 2); ctx.fill();
+    // Hair
+    var hairFlow = isRunning ? Math.sin(time * 0.008) * 3 : Math.sin(time * 0.002) * 1;
     ctx.fillStyle = jc;
+    ctx.beginPath(); ctx.arc(cx, headY2 - 2, headR + 2, Math.PI * 1.1, Math.PI * 1.9, true); ctx.fill();
     ctx.beginPath();
-    ctx.arc(cx, headY - 2, headR + 1, Math.PI * 1.15, Math.PI * 1.85, true);
-    ctx.fill();
-
-    // 目
-    ctx.fillStyle = '#222222';
-    var faceDir = this.vx >= 0 ? 1 : -1;
-    ctx.fillRect(cx + faceDir * 2 - 1, headY - 2, 2, 3);
-    ctx.fillRect(cx + faceDir * 6 - 1, headY - 2, 2, 3);
-
-    // 口
-    ctx.fillStyle = '#cc7755';
-    ctx.fillRect(cx + faceDir * 3, headY + 3, 3, 1);
-
-    // ヘルメット/帽子（頭装備）
-    if (this.equipSystem) {
-      var hd = this.equipSystem.getEquippedItem('head');
-      if (hd) {
-        var hdColor = EquipmentData.RANK_COLORS[hd.rank] || '#666';
-        ctx.fillStyle = hdColor;
-        ctx.beginPath();
-        ctx.arc(cx, headY - 4, headR + 2, Math.PI * 1.0, Math.PI * 2.0, true);
-        ctx.fill();
-        // ツバ
-        ctx.fillRect(cx - headR - 4, headY - 5, headR * 2 + 8, 3);
-      }
+    ctx.moveTo(cx - 10, headY2 - 8); ctx.lineTo(cx - 14 + hairFlow, headY2 - 22);
+    ctx.lineTo(cx - 4, headY2 - 10); ctx.lineTo(cx + 2 + hairFlow * 0.5, headY2 - 25);
+    ctx.lineTo(cx + 6, headY2 - 10); ctx.lineTo(cx + 12 + hairFlow * 0.3, headY2 - 20);
+    ctx.lineTo(cx + 13, headY2 - 6); ctx.closePath(); ctx.fill();
+    // Back hair
+    ctx.beginPath();
+    ctx.moveTo(cx - faceDir * 8, headY2 + 2);
+    ctx.quadraticCurveTo(cx - faceDir * 18 + hairFlow, headY2 + 10, cx - faceDir * 14 + hairFlow * 2, headY2 + 20);
+    ctx.lineTo(cx - faceDir * 10, headY2 + 5); ctx.closePath(); ctx.fill();
+    // Eyes
+    var eyeOffX = faceDir * 2, eyeY = headY2 - 1;
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.ellipse(cx - 5 + eyeOffX, eyeY, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 5 + eyeOffX, eyeY, 4, 5, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = jc;
+    ctx.beginPath(); ctx.arc(cx - 4 + eyeOffX + faceDir * 1.5, eyeY + 0.5, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 6 + eyeOffX + faceDir * 1.5, eyeY + 0.5, 2.5, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#111111';
+    ctx.beginPath(); ctx.arc(cx - 4 + eyeOffX + faceDir * 2, eyeY + 0.5, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 6 + eyeOffX + faceDir * 2, eyeY + 0.5, 1.2, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ffffff';
+    ctx.beginPath(); ctx.arc(cx - 3 + eyeOffX, eyeY - 1.5, 1, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.arc(cx + 7 + eyeOffX, eyeY - 1.5, 1, 0, Math.PI * 2); ctx.fill();
+    // Mouth
+    ctx.strokeStyle = '#cc7755'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.arc(cx + faceDir * 2, headY2 + 5, 3, 0.1, Math.PI - 0.1); ctx.stroke();
+    // Cheeks
+    ctx.fillStyle = 'rgba(255,150,150,0.2)';
+    ctx.beginPath(); ctx.ellipse(cx - 9, headY2 + 2, 3, 2, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(cx + 9, headY2 + 2, 3, 2, 0, 0, Math.PI * 2); ctx.fill();
+    // Helmet
+    if (headColor) {
+      ctx.fillStyle = headColor;
+      ctx.beginPath(); ctx.arc(cx, headY2 - 3, headR + 3, Math.PI * 1.05, Math.PI * 1.95, true); ctx.fill();
+      ctx.fillStyle = 'rgba(0,0,0,0.3)'; ctx.fillRect(cx - headR - 1, headY2 - 3, headR * 2 + 2, 3);
+      ctx.fillStyle = headColor; ctx.fillRect(cx - 2, headY2 - headR - 5, 4, 8);
     }
-
-    // --- 武器 ---
-    var weapX = bodyX + bodyW + 5;
-    var weapY = bodyY + 2 + bobY;
-
+    // Weapon
+    var weapX = bodyX + bodyW + 5, weapY = bodyY + 2 + bobY;
+    var weapSway = Math.sin(time * 0.002) * 0.05;
     ctx.save();
-    ctx.translate(weapX + 2, weapY + 18);
-    ctx.rotate(-0.4);
-
-    // 剣の柄
-    ctx.fillStyle = '#5a3a1a';
-    ctx.fillRect(-2, 0, 4, 10);
-    // ガード
+    ctx.translate(weapX + 2, weapY + 18); ctx.rotate(-0.4 + weapSway);
+    if (weaponRank === 'epic' || weaponRank === 'legend') {
+      ctx.shadowColor = weaponRank === 'legend' ? '#ffd700' : '#bb44ff';
+      ctx.shadowBlur = 12 + Math.sin(time * 0.004) * 5;
+    }
+    ctx.fillStyle = '#ffcc44'; ctx.beginPath(); ctx.arc(0, 12, 3, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#5a3a1a'; ctx.fillRect(-2, 0, 4, 12);
     ctx.fillStyle = weaponColor;
-    ctx.fillRect(-5, -1, 10, 3);
-    // 剣身
+    ctx.beginPath(); ctx.moveTo(-7, -1); ctx.lineTo(7, -1); ctx.lineTo(6, 2); ctx.lineTo(-6, 2); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = '#ff4444'; ctx.beginPath(); ctx.arc(0, 0, 2, 0, Math.PI * 2); ctx.fill();
     ctx.fillStyle = weaponColor;
-    ctx.beginPath();
-    ctx.moveTo(-3, -1);
-    ctx.lineTo(3, -1);
-    ctx.lineTo(1, -28);
-    ctx.lineTo(-1, -28);
-    ctx.closePath();
-    ctx.fill();
-    // 光沢
-    ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillRect(0, -26, 1, 22);
-
+    ctx.beginPath(); ctx.moveTo(-4, -1); ctx.lineTo(4, -1); ctx.lineTo(1.5, -30); ctx.lineTo(0, -33); ctx.lineTo(-1.5, -30); ctx.closePath(); ctx.fill();
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.beginPath(); ctx.moveTo(0, -2); ctx.lineTo(1, -2); ctx.lineTo(0.5, -30); ctx.lineTo(0, -30); ctx.closePath(); ctx.fill();
+    var gleamPos = ((time * 0.001) % 3) / 3;
+    if (gleamPos < 0.3) { var gleamY2 = -2 - gleamPos / 0.3 * 28; ctx.fillStyle = 'rgba(255,255,255,' + (0.6 - gleamPos * 2) + ')'; ctx.fillRect(-2, gleamY2, 4, 3); }
+    ctx.shadowBlur = 0;
     ctx.restore();
-
-    // --- 盾（左手） ---
-    if (this.equipSystem) {
-      var sh = this.equipSystem.getEquippedItem('shield');
-      if (sh) {
-        var shColor = EquipmentData.RANK_COLORS[sh.rank] || '#888';
-        var shX = bodyX - armW - 7;
-        var shY = bodyY + 8 + bobY;
-        ctx.fillStyle = shColor;
-        this._roundRect2(ctx, shX, shY, 10, 16, 2);
-        ctx.strokeStyle = 'rgba(255,255,255,0.3)';
-        ctx.lineWidth = 1;
-        ctx.strokeRect(shX + 2, shY + 2, 6, 12);
+    // Attack flash
+    if (justAttacked) {
+      ctx.fillStyle = 'rgba(255,255,255,0.35)';
+      ctx.beginPath(); ctx.ellipse(cx, this.y + this.height / 2, this.width / 2 + 5, this.height / 2 + 5, 0, 0, Math.PI * 2); ctx.fill();
+    }
+    // Dust particles
+    if (isRunning && this.grounded) {
+      ctx.fillStyle = 'rgba(180,160,130,0.4)';
+      for (var di = 0; di < 3; di++) {
+        var dustX = cx - faceDir * (10 + di * 8) + Math.sin(time * 0.01 + di) * 4;
+        var dustY = by - 2 + Math.cos(time * 0.012 + di * 2) * 3;
+        ctx.beginPath(); ctx.arc(dustX, dustY, 2 + Math.sin(time * 0.008 + di), 0, Math.PI * 2); ctx.fill();
       }
     }
-
     ctx.restore();
   }
 
