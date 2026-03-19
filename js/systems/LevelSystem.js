@@ -9,7 +9,7 @@ var LevelSystem = {
    * @returns {number} 次のレベルに必要なEXP
    */
   expToNext: function (level) {
-    return Math.floor(10 * Math.pow(level, 1.5));
+    return Math.floor(15 * Math.pow(level, 1.8));
   },
 
   /**

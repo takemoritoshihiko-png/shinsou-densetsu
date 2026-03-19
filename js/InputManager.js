@@ -17,7 +17,7 @@ class InputManager {
       'z': 'physical', 'Z': 'physical',
       'x': 'magical', 'X': 'magical',
       'c': 'ultimate', 'C': 'ultimate',
-      'q': 'auto_toggle', 'Q': 'auto_toggle',
+      'v': 'auto_toggle', 'V': 'auto_toggle',
     };
 
     this.padButtons = this._createPadButtons();

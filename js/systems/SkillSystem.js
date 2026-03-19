@@ -357,7 +357,7 @@ if (this._globalCD > 0) return null;    this._globalCD = this._globalCDMax;
       { key: 'Z', label: '物理攻撃', color: '#cc4444', usable: true },
       { key: 'X', label: '魔法攻撃', color: '#4488ff', usable: this.player.mp >= 3 },
       { key: 'C', label: '必殺技',   color: '#ffd700', usable: this.gauge >= this.gaugeMax },
-      { key: 'Q', label: autoEnabled ? 'AUTO ON' : 'AUTO OFF', color: autoEnabled ? '#44ff88' : '#888888', usable: true },
+      { key: 'V', label: autoEnabled ? 'AUTO ON' : 'AUTO OFF', color: autoEnabled ? '#44ff88' : '#888888', usable: true },
     ];
 
     var btnStartX = 20;

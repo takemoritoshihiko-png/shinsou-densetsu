@@ -42,7 +42,7 @@ class WaveManager {
     var world = this.world;
     var stage = this.stage;
     // ステージ内スケーリング(1〜5)
-    var stageMul = 1 + (stage - 1) * 0.15;
+    var stageMul = 1 + (stage - 1) * 0.25;
 
     // MonsterDataからモンスター取得
     var monsterPool = MonsterData.getMonsters(world);
