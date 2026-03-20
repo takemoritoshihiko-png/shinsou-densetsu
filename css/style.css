@@ -50,6 +50,7 @@ html, body {
 #loading-screen.hidden {
   opacity: 0;
   pointer-events: none;
+  display: none;
 }
 
 #loading-screen h1 {
