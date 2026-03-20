@@ -315,6 +315,7 @@ class EquipScene {
     }
 
     ctx.restore();
+// スクロールボタン    var maxScroll = Math.max(0, items.length * itemH - (bh - 34));    if (maxScroll > 0) {      // 上ボタン      var upY = by + 36;      ctx.fillStyle = this.scrollY > 0 ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";      ctx.fillRect(bx + bw - 30, upY, 28, 20);      ctx.font = "bold 14px " + CONFIG.FONT_FAMILY;      ctx.textAlign = "center"; ctx.textBaseline = "middle";      ctx.fillStyle = this.scrollY > 0 ? "#ffffff" : "#555555";      ctx.fillText("^", bx + bw - 16, upY + 10);      // 下ボタン      var downY = by + bh - 22;      ctx.fillStyle = this.scrollY < maxScroll ? "rgba(255,255,255,0.15)" : "rgba(255,255,255,0.05)";      ctx.fillRect(bx + bw - 30, downY, 28, 20);      ctx.fillStyle = this.scrollY < maxScroll ? "#ffffff" : "#555555";      ctx.fillText("v", bx + bw - 16, downY + 10);      // スクロールバー      var barH2 = Math.max(20, (bh - 34) * (bh - 34) / (items.length * itemH));      var barY2 = by + 34 + (this.scrollY / maxScroll) * (bh - 34 - barH2);      ctx.fillStyle = "rgba(255,255,255,0.2)";      ctx.fillRect(bx + bw - 4, barY2, 3, barH2);    }    this._bagScrollMax = maxScroll;    this._bagListBx = bx;    this._bagListBy = by;    this._bagListBw = bw;    this._bagListBh = bh;
 
     if (items.length === 0) {
       ctx.font = '14px ' + CONFIG.FONT_FAMILY;
@@ -722,6 +723,7 @@ class EquipScene {
       return;
     }
 
+// バッグスクロール    if (this._bagScrollMax > 0 && this._bagListBx) {      var sbx = this._bagListBx + this._bagListBw - 30;      var sby2 = this._bagListBy + 36;      var sdby = this._bagListBy + this._bagListBh - 22;      if (x >= sbx && x <= sbx + 28 && y >= sby2 && y <= sby2 + 20) {        this.scrollY = Math.max(0, this.scrollY - 120);        return;      }      if (x >= sbx && x <= sbx + 28 && y >= sdby && y <= sdby + 20) {        this.scrollY = Math.min(this._bagScrollMax, this.scrollY + 120);        return;      }    }
     // 戻る
     var bb = this.backButton;
     if (x >= bb.x && x <= bb.x + bb.w && y >= bb.y && y <= bb.y + bb.h) {
