@@ -59,7 +59,7 @@ class BattleScene {
 
     // BGM開始
     SoundSystem.resume();
-    SoundSystem.startBattleBGM();
+    SoundSystem.startBattleBGM(this.currentWorld);
 
     // フィールド装飾を生成
     this._generateField();
@@ -239,7 +239,10 @@ class BattleScene {
       }
       if (drop.type === 'gold') continue;
       this.dropItems.push(new DropItem(x, y, drop));
-// ドロップ音      if (drop.type === "equipment" && drop.rank) SoundSystem.playDrop(drop.rank);      else if (drop.type === "core" && drop.rank) SoundSystem.playDrop(drop.rank);      else SoundSystem.playDropCommon();
+      // ドロップ音
+      if (drop.type === "equipment" && drop.rank) SoundSystem.playDrop(drop.rank);
+      else if (drop.type === "core" && drop.rank) SoundSystem.playDrop(drop.rank);
+      else SoundSystem.playDropCommon();
       var tier = DropSystem.getDropTier(drop);
       if (tier >= 2) this.rareDropEffects.push(new RareDropEffect(tier));
     }
