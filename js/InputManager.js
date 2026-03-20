@@ -28,19 +28,31 @@ class InputManager {
   _createPadButtons() {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
-    var mr = 47;
-    var ar = 43;
-    var dpadCx = 120, dpadCy = H - 130;
-    var dpadSpread = 54;
+
+    // === 左側: 十字キー（ダイヤモンド配置） ===
+    var dr = 36;         // 移動ボタン半径
+    var dcx = 110;       // 十字キー中心X
+    var dcy = H - 110;   // 十字キー中心Y
+    var ds = 56;          // 中心からの距離
+
+    // === 右側: 攻撃ボタン（ダイヤモンド配置） ===
+    var ar = 36;          // 攻撃ボタン半径
+    var acx = W - 130;    // 攻撃中心X
+    var acy = H - 110;    // 攻撃中心Y
+    var as = 56;           // 中心からの距離
+
     return {
-      left:  { x: dpadCx - dpadSpread, y: dpadCy, r: mr, label: '<', key: 'left', color: '#ffffff' },
-      right: { x: dpadCx + dpadSpread, y: dpadCy, r: mr, label: '>', key: 'right', color: '#ffffff' },
-      up:    { x: dpadCx, y: dpadCy - dpadSpread, r: mr, label: '^', key: 'up', color: '#ffffff' },
-      down:  { x: dpadCx, y: dpadCy + dpadSpread, r: mr, label: 'v', key: 'down', color: '#ffffff' },
-      physical: { x: W - 250, y: H - 90, r: ar, label: 'ATK', key: 'physical', color: '#cc4444' },
-      magical:  { x: W - 100, y: H - 90, r: ar, label: 'MAG', key: 'magical', color: '#4488ff' },
-      ultimate: { x: W - 175, y: H - 220, r: ar, label: 'ULT', key: 'ultimate', color: '#ffd700' },
-      autoBtn:  { x: W - 60, y: H - 220, r: 30, label: 'AUTO', key: 'auto_toggle', color: '#44ff88' },
+      // 十字キー
+      left:  { x: dcx - ds, y: dcy,      r: dr, label: '<',    key: 'left',  color: '#bbbbcc' },
+      right: { x: dcx + ds, y: dcy,      r: dr, label: '>',    key: 'right', color: '#bbbbcc' },
+      up:    { x: dcx,      y: dcy - ds,  r: dr, label: '^',    key: 'up',    color: '#bbbbcc' },
+      down:  { x: dcx,      y: dcy + ds,  r: dr, label: 'v',    key: 'down',  color: '#bbbbcc' },
+
+      // 攻撃ボタン（ダイヤモンド配置: 左=物理, 右=魔法, 上=必殺, 下=AUTO）
+      physical: { x: acx - as, y: acy,      r: ar, label: 'ATK',  key: 'physical',    color: '#cc4444' },
+      magical:  { x: acx + as, y: acy,      r: ar, label: 'MAG',  key: 'magical',     color: '#4488ff' },
+      ultimate: { x: acx,      y: acy - as,  r: ar, label: 'ULT',  key: 'ultimate',    color: '#ffd700' },
+      autoBtn:  { x: acx,      y: acy + as,  r: ar, label: 'AUTO', key: 'auto_toggle', color: '#44dd88' },
     };
   }
 
@@ -135,32 +147,52 @@ class InputManager {
   renderVirtualPad(ctx) {
     if (!this.virtualPadEnabled) return;
 
-    var dpadCx = 120, dpadCy = CONFIG.CANVAS_HEIGHT - 130;
+    // 左側: 十字キー中心ドット
     ctx.save();
-    ctx.globalAlpha = 0.2;
-    ctx.fillStyle = '#ffffff';
+    ctx.globalAlpha = 0.15;
+    ctx.fillStyle = '#aaaacc';
     ctx.beginPath();
-    ctx.arc(dpadCx, dpadCy, 16, 0, Math.PI * 2);
+    ctx.arc(110, CONFIG.CANVAS_HEIGHT - 110, 12, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
+    // 右側: 攻撃中心ドット
+    ctx.save();
+    ctx.globalAlpha = 0.1;
+    ctx.fillStyle = '#ccaa88';
+    ctx.beginPath();
+    ctx.arc(CONFIG.CANVAS_WIDTH - 130, CONFIG.CANVAS_HEIGHT - 110, 12, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.restore();
+
+    // 全ボタン描画
     for (var name in this.padButtons) {
       var btn = this.padButtons[name];
       var isActive = this.isKeyDown(btn.key);
+
       ctx.save();
+
+      // 背景円
       ctx.beginPath();
       ctx.arc(btn.x, btn.y, btn.r, 0, Math.PI * 2);
-      ctx.fillStyle = isActive ? (btn.color + '99') : (btn.color + '44');
-      ctx.fill();
-      ctx.strokeStyle = isActive ? btn.color : (btn.color + '99');
+      if (isActive) {
+        ctx.fillStyle = btn.color + '88';
+        ctx.strokeStyle = btn.color;
+      } else {
+        ctx.fillStyle = btn.color + '22';
+        ctx.strokeStyle = btn.color + '55';
+      }
       ctx.lineWidth = 2;
+      ctx.fill();
       ctx.stroke();
-      var fontSize = (name === 'autoBtn') ? 18 : (btn.label.length > 3 ? 22 : 28);
-      ctx.font = 'bold ' + fontSize + 'px "Noto Sans JP", sans-serif';
+
+      // ラベル
+      ctx.font = 'bold 14px "Noto Sans JP", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
-      ctx.fillStyle = isActive ? '#ffffff' : (btn.color + 'dd');
+      ctx.fillStyle = isActive ? '#ffffff' : (btn.color + 'cc');
       ctx.fillText(btn.label, btn.x, btn.y);
+
       ctx.restore();
     }
   }
