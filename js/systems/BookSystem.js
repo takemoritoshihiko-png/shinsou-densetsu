@@ -21,7 +21,6 @@ class BookSystem {
     ];
   }
 
-  }
 
   // === モンスター ===
   registerMonsterEncounter(monsterId) {
