@@ -7,6 +7,20 @@ class BookSystem {
     this.equipment = {};
     // アイテム図鑑 { itemKey: true }
     this.items = {};
+    this.ALL_ITEM_KEYS = [
+      { key: 'hpPotion', name: 'HPポーション', color: '#44ff88', desc: 'HP 30%回復' },
+      { key: 'mpPotion', name: 'MPポーション', color: '#4488ff', desc: 'MP 30%回復' },
+      { key: 'rerollStone', name: '再抽選の石', color: '#44aaff', desc: 'スロット特性を再抽選' },
+      { key: 'eraseStone', name: '消去の石', color: '#ff6666', desc: 'スロット特性を消去' },
+      { key: 'enhanceMat', name: '強化素材', color: '#ff8844', desc: '仲間パッシブ強化' },
+      { key: 'coreCommon', name: 'コモンコア', color: '#aaaaaa', desc: '装備+値強化' },
+      { key: 'coreUncommon', name: 'アンコモンコア', color: '#44cc44', desc: '装備+値強化' },
+      { key: 'coreRare', name: 'レアコア', color: '#4488ff', desc: '装備+値強化' },
+      { key: 'coreEpic', name: 'エピックコア', color: '#bb44ff', desc: '装備+値強化' },
+      { key: 'coreLegend', name: 'レジェンドコア', color: '#ffd700', desc: '装備+値強化' },
+    ];
+  }
+
   }
 
   // === モンスター ===
@@ -81,18 +95,4 @@ class BookSystem {
     }
     return count;
   }
-
-  // 全アイテムキー一覧
-  ALL_ITEM_KEYS = [
-    { key: 'hpPotion', name: 'HPポーション', color: '#44ff88', desc: 'HP 30%回復' },
-    { key: 'mpPotion', name: 'MPポーション', color: '#4488ff', desc: 'MP 30%回復' },
-    { key: 'rerollStone', name: '再抽選の石', color: '#44aaff', desc: 'スロット特性を再抽選' },
-    { key: 'eraseStone', name: '消去の石', color: '#ff6666', desc: 'スロット特性を消去' },
-    { key: 'enhanceMat', name: '強化素材', color: '#ff8844', desc: '仲間パッシブ強化' },
-    { key: 'coreCommon', name: 'コモンコア', color: '#aaaaaa', desc: '装備+値強化' },
-    { key: 'coreUncommon', name: 'アンコモンコア', color: '#44cc44', desc: '装備+値強化' },
-    { key: 'coreRare', name: 'レアコア', color: '#4488ff', desc: '装備+値強化' },
-    { key: 'coreEpic', name: 'エピックコア', color: '#bb44ff', desc: '装備+値強化' },
-    { key: 'coreLegend', name: 'レジェンドコア', color: '#ffd700', desc: '装備+値強化' },
-  ];
 }
