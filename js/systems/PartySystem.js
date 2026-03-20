@@ -125,7 +125,6 @@ class PartySystem {
     return result;
   }
 
-  }
 
   // 前衛全員のパッシブバフを統合して返す（強化倍率込み）
   getCombinedPassiveBuffs() {
