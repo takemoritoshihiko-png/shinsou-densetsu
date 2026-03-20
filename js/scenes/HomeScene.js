@@ -1,29 +1,29 @@
-// ホーム画面シーン（ダークファンタジーテーマ）
+// ホーム画面シーン（RPG UI風）
 class HomeScene {
   constructor(sceneManager, inputManager, player, partySystem) {
     this.sceneManager = sceneManager;
     this.inputManager = inputManager;
     this.player = player;
     this.party = partySystem;
-
-    var bw = 100, bh = 80, gx = 8;
-    var row1y = 240, row2y = 335;
-    var startX = 80;
-    this.buttons = [
-      { label: '出撃',     icon: '⚔', x: startX,               y: row1y, w: bw, h: bh, scene: 'stageSelect', color: '#cc4444' },
-      { label: 'パーティ', icon: '👥', x: startX + (bw+gx)*1,  y: row1y, w: bw, h: bh, scene: 'party',       color: '#44aacc' },
-      { label: '装備',     icon: '🛡', x: startX + (bw+gx)*2,  y: row1y, w: bw, h: bh, scene: 'equip',       color: '#8888cc' },
-      { label: '強化',     icon: '🔨', x: startX + (bw+gx)*3,  y: row1y, w: bw, h: bh, scene: 'upgrade',     color: '#ffaa22' },
-      { label: 'ガチャ',   icon: '✨', x: startX + (bw+gx)*4,  y: row1y, w: bw, h: bh, scene: 'gacha',       color: '#bb44ff' },
-      { label: 'ショップ', icon: '🛒', x: startX + (bw+gx)*5,  y: row1y, w: bw, h: bh, scene: 'shop',        color: '#44cc66' },
-      { label: 'バッグ',   icon: '🎒', x: startX + (bw+gx)*6,  y: row1y, w: bw, h: bh, scene: 'bag',         color: '#aa8844' },
-      { label: '図鑑',     icon: '📖', x: startX,               y: row2y, w: bw, h: bh, scene: 'book',        color: '#88aacc' },
-    ];
-
-    this.settingsBtn = { x: startX + (bw+gx)*1, y: row2y, w: bw, h: bh };
-    this.saveBtn = { x: startX + (bw+gx)*2, y: row2y, w: bw, h: bh };
-    this.loadBtn = { x: startX + (bw+gx)*3, y: row2y, w: bw, h: bh };
     this.elapsed = 0;
+
+    // 8メニューボタン (2行×4列)
+    var bw = 190, bh = 60, gx = 16, gy = 12;
+    var row1y = 310, row2y = row1y + bh + gy;
+    var sx = 40;
+    this.buttons = [
+      { label: '出撃',     icon: '⚔',  scene: 'stageSelect', x: sx,                y: row1y, w: bw, h: bh, grad: ['#4a6a8a','#3a5070'] },
+      { label: 'パーティ', icon: '👥', scene: 'party',       x: sx+(bw+gx),        y: row1y, w: bw, h: bh, grad: ['#5a5a7a','#4a4a6a'] },
+      { label: '装備',     icon: '🛡',  scene: 'equip',       x: sx+(bw+gx)*2,      y: row1y, w: bw, h: bh, grad: ['#6a6a7a','#555568'] },
+      { label: '強化',     icon: '🔨', scene: 'upgrade',     x: sx+(bw+gx)*3,      y: row1y, w: bw, h: bh, grad: ['#7a5a3a','#6a4a2a'] },
+      { label: 'ガチャ',   icon: '✨', scene: 'gacha',       x: sx,                y: row2y, w: bw, h: bh, grad: ['#7a6a3a','#6a5a2a'] },
+      { label: 'ショップ', icon: '🛒', scene: 'shop',        x: sx+(bw+gx),        y: row2y, w: bw, h: bh, grad: ['#5a6a6a','#4a5a5a'] },
+      { label: 'バッグ',   icon: '🎒', scene: 'bag',         x: sx+(bw+gx)*2,      y: row2y, w: bw, h: bh, grad: ['#5a7a6a','#4a6a5a'] },
+      { label: '設定',     icon: '⚙',  scene: 'settings',    x: sx+(bw+gx)*3,      y: row2y, w: bw, h: bh, grad: ['#5a5a5a','#4a4a4a'] },
+    ];
+    // セーブ/ロードはボタン配列の外
+    this.saveBtn = null;
+    this.loadBtn = null;
   }
 
   enter() {
@@ -31,223 +31,223 @@ class HomeScene {
     this.elapsed = 0;
   }
 
-  update(dt) {
-    this.elapsed += dt;
-  }
+  update(dt) { this.elapsed += dt; }
 
   render(ctx) {
-    var W = CONFIG.CANVAS_WIDTH;
-    var H = CONFIG.CANVAS_HEIGHT;
-    var cx = W / 2;
-
-    // ダークファンタジー背景
-    var grad = ctx.createLinearGradient(0, 0, 0, H);
-    grad.addColorStop(0, '#0c0a1e');
-    grad.addColorStop(0.5, '#12102a');
-    grad.addColorStop(1, '#0a0818');
-    ctx.fillStyle = grad;
-    ctx.fillRect(0, 0, W, H);
-
-    // 装飾パーティクル
-    ctx.globalAlpha = 0.06;
-    for (var pi = 0; pi < 15; pi++) {
-      var px = (pi * 71 + this.elapsed * 0.01 * (pi % 3 + 1)) % W;
-      var py = (pi * 47 + this.elapsed * 0.005 * (pi % 2 + 1)) % H;
-      ctx.fillStyle = '#ffd700';
-      ctx.beginPath();
-      ctx.arc(px, py, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-    }
-    ctx.globalAlpha = 1;
-
-    // --- ヘッダー: ゲームタイトル ---
-    ctx.save();
-    ctx.font = 'bold 28px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'left';
-    ctx.textBaseline = 'middle';
-    var titleGrad = ctx.createLinearGradient(30, 0, 200, 0);
-    titleGrad.addColorStop(0, '#ffd700');
-    titleGrad.addColorStop(1, '#ffaa44');
-    ctx.fillStyle = titleGrad;
-    ctx.shadowColor = 'rgba(255,215,0,0.3)';
-    ctx.shadowBlur = 8;
-    ctx.fillText('神装伝説', 30, 28);
-    ctx.restore();
-
-    // --- プレイヤー情報バー ---
-    this._renderPlayerBar(ctx, W);
-
-    // --- 区切り線 ---
-    ctx.strokeStyle = 'rgba(255,215,0,0.15)';
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.moveTo(30, 225);
-    ctx.lineTo(W - 30, 225);
-    ctx.stroke();
-
-    // --- メニューボタン ---
-    for (var i = 0; i < this.buttons.length; i++) {
-      this._renderButton(ctx, this.buttons[i]);
-    }
-
-    // --- 設定ボタン ---
-    var sb = this.settingsBtn;
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    ctx.strokeStyle = 'rgba(255,255,255,0.2)';
-    ctx.lineWidth = 1;
-    this._rr(ctx, sb.x, sb.y, sb.w, sb.h, 8);
-    ctx.font = '22px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = '#888888';
-    ctx.fillText('⚙', sb.x + sb.w / 2, sb.y + 30);
-    ctx.font = '12px ' + CONFIG.FONT_FAMILY;
-    ctx.fillText('設定', sb.x + sb.w / 2, sb.y + 56);
-// セーブボタン    var svb = this.saveBtn;    ctx.fillStyle = 'rgba(255,255,255,0.04)';    ctx.strokeStyle = 'rgba(255,200,50,0.4)';    ctx.lineWidth = 1;    this._rr(ctx, svb.x, svb.y, svb.w, svb.h, 8);    ctx.font = '22px ' + CONFIG.FONT_FAMILY;    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';    ctx.fillStyle = '#ffd700';    ctx.fillText('💾', svb.x + svb.w / 2, svb.y + 30);    ctx.font = '12px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#888888';    ctx.fillText('セーブ', svb.x + svb.w / 2, svb.y + 56);    // ロードボタン    var ldb = this.loadBtn;    ctx.fillStyle = 'rgba(255,255,255,0.04)';    ctx.strokeStyle = 'rgba(68,170,255,0.4)';    ctx.lineWidth = 1;    this._rr(ctx, ldb.x, ldb.y, ldb.w, ldb.h, 8);    ctx.font = '22px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#44aaff';    ctx.fillText('📂', ldb.x + ldb.w / 2, ldb.y + 30);    ctx.font = '12px ' + CONFIG.FONT_FAMILY;    ctx.fillStyle = '#888888';    ctx.fillText('ロード', ldb.x + ldb.w / 2, ldb.y + 56);
-  }
-
-  _renderPlayerBar(ctx, W) {
+    var W = CONFIG.CANVAS_WIDTH, H = CONFIG.CANVAS_HEIGHT;
     var p = this.player;
     var jobData = ClassData.get(p.job);
 
-    // パネル背景
-    ctx.fillStyle = 'rgba(255,255,255,0.03)';
-    this._rr(ctx, 25, 55, W - 50, 160, 8);
-    ctx.strokeStyle = 'rgba(255,215,0,0.1)';
-    ctx.lineWidth = 1;
-    ctx.strokeRect(25, 55, W - 50, 160);
+    // === 背景 ===
+    var bg = ctx.createLinearGradient(0, 0, W, H);
+    bg.addColorStop(0, '#0a0e1e');
+    bg.addColorStop(0.5, '#101428');
+    bg.addColorStop(1, '#0a0e1e');
+    ctx.fillStyle = bg;
+    ctx.fillRect(0, 0, W, H);
 
-    var lx = 40;
+    // 背景の装飾（光の粒子）
+    ctx.globalAlpha = 0.04;
+    for (var pi = 0; pi < 20; pi++) {
+      var px = (pi * 53 + this.elapsed * 0.008 * (pi % 3 + 1)) % W;
+      var py = (pi * 37 + this.elapsed * 0.004 * (pi % 2 + 1)) % H;
+      ctx.fillStyle = '#ffd700';
+      ctx.beginPath(); ctx.arc(px, py, 1.5, 0, Math.PI * 2); ctx.fill();
+    }
+    ctx.globalAlpha = 1;
 
-    // キャラアイコン
-    ctx.fillStyle = jobData ? jobData.color : '#4488ff';
-    this._rr(ctx, lx, 70, 50, 60, 6);
-    ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
+    // === タイトル ===
+    ctx.save();
+    ctx.font = 'bold 28px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.shadowColor = 'rgba(255,215,0,0.3)'; ctx.shadowBlur = 10;
+    var tg = ctx.createLinearGradient(W/2-80, 0, W/2+80, 0);
+    tg.addColorStop(0, '#ffd700'); tg.addColorStop(0.5, '#fff4a3'); tg.addColorStop(1, '#ffd700');
+    ctx.fillStyle = tg;
+    ctx.fillText('◇ 神装伝説 ◇', W / 2, 26);
+    ctx.restore();
+
+    // 区切り線
+    ctx.strokeStyle = 'rgba(255,215,0,0.2)'; ctx.lineWidth = 1;
+    ctx.beginPath(); ctx.moveTo(W/2-180, 44); ctx.lineTo(W/2+180, 44); ctx.stroke();
+
+    // === 左パネル: キャラ情報 ===
+    var panelX = 30, panelY = 56, panelW = 420, panelH = 230;
+    this._drawPanel(ctx, panelX, panelY, panelW, panelH);
+
+    // Lvバッジ（紫の円）
+    var badgeX = panelX + 55, badgeY = panelY + 55;
+    ctx.fillStyle = '#2a1a4a';
+    ctx.beginPath(); ctx.arc(badgeX, badgeY, 38, 0, Math.PI * 2); ctx.fill();
+    ctx.strokeStyle = '#8866aa'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(badgeX, badgeY, 38, 0, Math.PI * 2); ctx.stroke();
+    // 宝石装飾
+    var gems = [[0,-40],[0,40],[-40,0],[40,0]];
+    for (var gi = 0; gi < gems.length; gi++) {
+      ctx.fillStyle = '#44ddff';
+      ctx.beginPath(); ctx.arc(badgeX+gems[gi][0]*0.95, badgeY+gems[gi][1]*0.95, 3, 0, Math.PI*2); ctx.fill();
+    }
+    ctx.font = '13px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#aaaaaa';
+    ctx.fillText('Lv', badgeX, badgeY - 12);
+    ctx.font = 'bold 28px ' + CONFIG.FONT_FAMILY;
     ctx.fillStyle = '#ffffff';
-    ctx.fillText('Lv', lx + 25, 85);
-    ctx.font = 'bold 22px ' + CONFIG.FONT_FAMILY;
-    ctx.fillText('' + p.level, lx + 25, 110);
+    ctx.fillText('' + p.level, badgeX, badgeY + 10);
 
     // 名前・職業
-    ctx.textAlign = 'left';
+    var infoX = panelX + 110;
     ctx.font = 'bold 20px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(p.name, lx + 65, 80);
-
-    ctx.font = '13px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = jobData ? jobData.color : '#aaa';
-    ctx.fillText(p.rarity + ' ' + (jobData ? jobData.name : p.job), lx + 65, 100);
-
-    // EXPバー
-    var expBarX = lx + 65, expBarW = 200, expBarH = 12, expBarY = 115;
-    var expRatio = p.level >= LevelSystem.MAX_LEVEL ? 1 : p.totalExp / p.expToNext;
-    ctx.fillStyle = '#1a1a2e';
-    this._rr(ctx, expBarX, expBarY, expBarW, expBarH, 3);
-    ctx.fillStyle = '#ffd700';
-    if (expRatio > 0) {
-      ctx.fillRect(expBarX + 1, expBarY + 1, (expBarW - 2) * expRatio, expBarH - 2);
-    }
-    ctx.font = '9px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.fillStyle = '#ffffff';
-    ctx.fillText(p.level >= LevelSystem.MAX_LEVEL ? 'MAX' : p.totalExp + '/' + p.expToNext, expBarX + expBarW / 2, expBarY + expBarH / 2);
-
-    // ゴールド
     ctx.textAlign = 'left';
-    ctx.font = 'bold 16px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = '#ffd700';
-    ctx.fillText(p.ownedGold + ' G', lx + 65, 145);
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(p.name, infoX, panelY + 28);
 
-    // 右側: ステータス
-    var rx = 380;
-    var statPairs = [
-      ['HP', p.hpMax, 'ATK', p.atk],
-      ['DEF', p.def, 'SPD', p.spd],
-      ['MP', p.mpMax, 'CRIT', p.crit + '%'],
+    ctx.font = '14px ' + CONFIG.FONT_FAMILY;
+    ctx.fillStyle = jobData ? jobData.color : '#aaa';
+    ctx.fillText(p.rarity + ' ' + (jobData ? jobData.name : p.job), infoX, panelY + 50);
+
+    // EXPバー（装飾付き）
+    var expX = infoX, expY = panelY + 65, expW = 280, expH = 18;
+    var expR = p.level >= LevelSystem.MAX_LEVEL ? 1 : p.totalExp / p.expToNext;
+    ctx.fillStyle = '#1a1a2e';
+    this._rr(ctx, expX, expY, expW, expH, 4);
+    var expGrad = ctx.createLinearGradient(expX, 0, expX + expW, 0);
+    expGrad.addColorStop(0, '#22aadd'); expGrad.addColorStop(1, '#ffcc44');
+    ctx.fillStyle = expGrad;
+    if (expR > 0) ctx.fillRect(expX + 2, expY + 2, (expW - 4) * expR, expH - 4);
+    ctx.strokeStyle = '#4488aa'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(expX, expY, expW, expH);
+    ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+    ctx.textAlign = 'center'; ctx.fillStyle = '#ffffff';
+    ctx.fillText(p.level >= LevelSystem.MAX_LEVEL ? 'MAX' : p.totalExp + '/' + p.expToNext, expX + expW / 2, expY + expH / 2);
+
+    // ゴールド・素材・石
+    var resY = panelY + 100;
+    ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY; ctx.textAlign = 'left';
+    ctx.fillStyle = '#ffd700'; ctx.fillText('💰 ' + p.ownedGold + ' G', panelX + 20, resY);
+    ctx.fillStyle = '#ff8844'; ctx.fillText('🧱 素材:' + (this.party ? (this.party.enhanceMaterials || 0) : 0), panelX + 160, resY);
+    ctx.fillStyle = '#44aaff'; ctx.fillText('💎 石:' + (p.equipSystem ? p.equipSystem.rerollStones : 0), panelX + 310, resY);
+
+    // === 右パネル: ステータス ===
+    var spX = 470, spY = 56, spW = 460, spH = 230;
+    this._drawPanel(ctx, spX, spY, spW, spH);
+
+    var stats = [
+      { label: 'HP',   val: p.hpMax, color: '#ff4466', barMax: 2000 },
+      { label: 'DEF',  val: p.def,   color: '#4488cc', barMax: 200 },
+      { label: 'MP',   val: p.mpMax, color: '#4488ff', barMax: 200 },
+      { label: 'ATK',  val: p.atk,   color: '#ff6644', barMax: 300 },
+      { label: 'SPD',  val: p.spd,   color: '#44cc88', barMax: 200 },
+      { label: 'CRIT', val: p.crit + '%', color: '#ffcc44', barMax: 30, isCrit: true },
     ];
-    ctx.font = '12px ' + CONFIG.FONT_FAMILY;
-    for (var r = 0; r < statPairs.length; r++) {
-      var sy = 75 + r * 22;
-      ctx.fillStyle = '#666';
-      ctx.fillText(statPairs[r][0], rx, sy);
-      ctx.fillStyle = '#ddd';
-      ctx.fillText('' + statPairs[r][1], rx + 40, sy);
-      ctx.fillStyle = '#666';
-      ctx.fillText(statPairs[r][2], rx + 110, sy);
-      ctx.fillStyle = '#ddd';
-      ctx.fillText('' + statPairs[r][3], rx + 155, sy);
+
+    var col1x = spX + 20, col2x = spX + spW / 2 + 10;
+    for (var si = 0; si < stats.length; si++) {
+      var s = stats[si];
+      var col = si % 2 === 0 ? col1x : col2x;
+      var row = Math.floor(si / 2);
+      var sy = spY + 20 + row * 70;
+
+      // アイコン背景
+      ctx.fillStyle = s.color + '33';
+      ctx.strokeStyle = s.color + '66';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.arc(col + 18, sy + 18, 16, 0, Math.PI * 2); ctx.fill(); ctx.stroke();
+
+      // ラベル
+      ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
+      ctx.textAlign = 'left'; ctx.fillStyle = '#aaaaaa';
+      ctx.fillText(s.label, col + 40, sy + 10);
+
+      // 値
+      ctx.font = 'bold 22px ' + CONFIG.FONT_FAMILY;
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'right';
+      ctx.fillText('' + s.val, col + 190, sy + 12);
+
+      // ミニバー
+      if (!s.isCrit) {
+        var bw2 = 150, bh2 = 6, bx2 = col + 40, by2 = sy + 24;
+        var ratio = Math.min((typeof s.val === 'number' ? s.val : 0) / s.barMax, 1);
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(bx2, by2, bw2, bh2);
+        ctx.fillStyle = s.color; ctx.fillRect(bx2, by2, bw2 * ratio, bh2);
+      } else {
+        var critVal = parseFloat(s.val);
+        var bw3 = 150, bh3 = 6, bx3 = col + 40, by3 = sy + 24;
+        ctx.fillStyle = '#1a1a2e'; ctx.fillRect(bx3, by3, bw3, bh3);
+        ctx.fillStyle = s.color; ctx.fillRect(bx3, by3, bw3 * Math.min(critVal / s.barMax, 1), bh3);
+      }
     }
 
-    // 素材数
-    ctx.font = '11px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = '#ff8844';
-    ctx.fillText('素材:' + (this.party ? (this.party.enhanceMaterials || 0) : 0), rx, 145);
-    ctx.fillStyle = '#44aaff';
-    ctx.fillText('石:' + (this.player.equipSystem ? this.player.equipSystem.rerollStones : 0), rx + 70, 145);
+    // === メニューボタン ===
+    for (var i = 0; i < this.buttons.length; i++) {
+      this._drawMenuBtn(ctx, this.buttons[i]);
+    }
   }
 
-  _renderButton(ctx, btn) {
-    ctx.save();
+  _drawPanel(ctx, x, y, w, h) {
+    ctx.fillStyle = 'rgba(15,15,30,0.85)';
+    this._rr(ctx, x, y, w, h, 10);
+    ctx.strokeStyle = 'rgba(100,120,160,0.4)'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(x, y, w, h);
+    // 角の宝石
+    ctx.fillStyle = '#44ddff';
+    ctx.beginPath(); ctx.arc(x+6, y+6, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+w-6, y+6, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+6, y+h-6, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(x+w-6, y+h-6, 2, 0, Math.PI*2); ctx.fill();
+  }
 
-    // ボタン背景
-    ctx.fillStyle = 'rgba(255,255,255,0.04)';
-    ctx.strokeStyle = btn.color + '66';
-    ctx.lineWidth = 1.5;
+  _drawMenuBtn(ctx, btn) {
+    // ボタン背景グラデーション
+    var g = ctx.createLinearGradient(btn.x, btn.y, btn.x, btn.y + btn.h);
+    g.addColorStop(0, btn.grad[0]); g.addColorStop(1, btn.grad[1]);
+    ctx.fillStyle = g;
     this._rr(ctx, btn.x, btn.y, btn.w, btn.h, 8);
 
-    // 上部に色付きバー
-    ctx.fillStyle = btn.color + '44';
-    ctx.fillRect(btn.x + 2, btn.y + 2, btn.w - 4, 3);
+    // 枠
+    ctx.strokeStyle = 'rgba(180,180,200,0.35)'; ctx.lineWidth = 1.5;
+    ctx.strokeRect(btn.x, btn.y, btn.w, btn.h);
+    // 上部ハイライト
+    ctx.fillStyle = 'rgba(255,255,255,0.08)';
+    ctx.fillRect(btn.x + 2, btn.y + 2, btn.w - 4, btn.h / 3);
+
+    // 角の宝石
+    ctx.fillStyle = '#44ddff';
+    ctx.beginPath(); ctx.arc(btn.x+6, btn.y+btn.h/2, 2, 0, Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.arc(btn.x+btn.w-6, btn.y+btn.h/2, 2, 0, Math.PI*2); ctx.fill();
 
     // アイコン
     ctx.font = '24px ' + CONFIG.FONT_FAMILY;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillStyle = btn.color;
-    ctx.fillText(btn.icon, btn.x + btn.w / 2, btn.y + 32);
+    ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(btn.icon, btn.x + 40, btn.y + btn.h / 2);
 
     // ラベル
-    ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
-    ctx.fillStyle = '#cccccc';
-    ctx.fillText(btn.label, btn.x + btn.w / 2, btn.y + 62);
-
-    ctx.restore();
+    ctx.font = 'bold 20px ' + CONFIG.FONT_FAMILY;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(btn.label, btn.x + btn.w / 2 + 15, btn.y + btn.h / 2);
   }
 
   onTap(x, y) {
     for (var i = 0; i < this.buttons.length; i++) {
-      var btn = this.buttons[i];
-      if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
-        this.sceneManager.changeScene(btn.scene);
+      var b = this.buttons[i];
+      if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
+        this.sceneManager.changeScene(b.scene);
         return;
       }
     }
-    // 設定ボタン
-    var sb = this.settingsBtn;
-    if (x >= sb.x && x <= sb.x + sb.w && y >= sb.y && y <= sb.y + sb.h) {
-      this.sceneManager.changeScene('settings');
-      return;
-    }
-// セーブボタン    var svb = this.saveBtn;    if (x >= svb.x && x <= svb.x + svb.w && y >= svb.y && y <= svb.y + svb.h) {      var scene = this.sceneManager.scenes["saveload"];      if (scene) scene.mode = "save";      this.sceneManager.changeScene("saveload");      return;    }    // ロードボタン    var ldb = this.loadBtn;    if (x >= ldb.x && x <= ldb.x + ldb.w && y >= ldb.y && y <= ldb.y + ldb.h) {      var scene2 = this.sceneManager.scenes["saveload"];      if (scene2) scene2.mode = "load";      this.sceneManager.changeScene("saveload");      return;    }
   }
 
   exit() {}
 
   _rr(ctx, x, y, w, h, r) {
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.lineTo(x + w - r, y);
-    ctx.quadraticCurveTo(x + w, y, x + w, y + r);
-    ctx.lineTo(x + w, y + h - r);
-    ctx.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    ctx.lineTo(x + r, y + h);
-    ctx.quadraticCurveTo(x, y + h, x, y + h - r);
-    ctx.lineTo(x, y + r);
-    ctx.quadraticCurveTo(x, y, x + r, y);
-    ctx.closePath();
-    ctx.fill();
-    ctx.stroke();
+    ctx.moveTo(x+r, y); ctx.lineTo(x+w-r, y);
+    ctx.quadraticCurveTo(x+w, y, x+w, y+r); ctx.lineTo(x+w, y+h-r);
+    ctx.quadraticCurveTo(x+w, y+h, x+w-r, y+h); ctx.lineTo(x+r, y+h);
+    ctx.quadraticCurveTo(x, y+h, x, y+h-r); ctx.lineTo(x, y+r);
+    ctx.quadraticCurveTo(x, y, x+r, y); ctx.closePath();
+    ctx.fill(); ctx.stroke();
   }
 }
