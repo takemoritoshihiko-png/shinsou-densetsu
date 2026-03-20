@@ -211,7 +211,6 @@ class ShopScene {
 
   // ===== 素材タブ =====
   _renderMaterialTab(ctx) {
-  _renderMaterialTab(ctx) {
     var items = [
       { id: 'enhMat',   name: '強化素材',        price: 200,   desc: '仲間の強化に使用', count: this.party ? (this.party.enhanceMaterials || 0) : 0 },
       { id: 'coreC',    name: 'コモンコア',      price: 300,   desc: '装備強化+値', count: this.equip.cores.common },
