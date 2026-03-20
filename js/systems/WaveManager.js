@@ -47,39 +47,49 @@ class WaveManager {
     // MonsterDataからモンスター取得
     var monsterPool = MonsterData.getMonsters(world);
 
-    // Wave 1〜3: 通常ウェーブ（3〜5体）
-    for (var w = 0; w < 2; w++) {
+    // MonsterDataからモンスター取得
+    var monsterPool = MonsterData.getMonsters(world);
+
+    // W10特別倍率
+    var w10StatMul = (world === 10) ? 1.4 : 1.0;
+    var normalWaveCount = (world === 10) ? 3 : 2;
+
+    // 通常ウェーブ
+    for (var w = 0; w < normalWaveCount; w++) {
       var count = 3 + Math.floor(Math.random() * 3);
-      if (world === 10) { count = count * 3; }
+      if (world === 10) { count = Math.ceil(count * 4.5); }
       var enemies = [];
       for (var i = 0; i < count; i++) {
         var m = monsterPool.length > 0
           ? monsterPool[Math.floor(Math.random() * monsterPool.length)]
           : { hp: 30, atk: 5, matk: 0, def: 2, mdef: 0, spd: 50, exp: 10, gold: 5, spriteColor: '#cc4444' };
+        var totalMul = stageMul * w10StatMul;
         enemies.push({
-          hp: Math.floor(m.hp * stageMul),
+          hp: Math.floor(m.hp * totalMul),
           mp: 0,
-          atk: Math.floor(m.atk * stageMul),
-          matk: Math.floor((m.matk || 0) * stageMul),
-          def: Math.floor(m.def * stageMul),
-          mdef: Math.floor((m.mdef || 0) * stageMul),
+          atk: Math.floor(m.atk * totalMul),
+          matk: Math.floor((m.matk || 0) * totalMul),
+          def: Math.floor(m.def * totalMul),
+          mdef: Math.floor((m.mdef || 0) * totalMul),
           spd: m.spd || 50,
           crit: 0,
-          exp: Math.floor(m.exp * stageMul),
-          gold: Math.floor(m.gold * stageMul),
+          exp: Math.floor(m.exp * totalMul),
+          gold: Math.floor(m.gold * totalMul),
           spriteColor: m.spriteColor || m.color,
           monsterName: m.name,
-          race: m.race || "",
+          race: m.race || '',
           grade: m.grade || 1,
           color: m.color || m.spriteColor,
-          eye: m.eye || "",
-          shape: m.shape || "",
+          eye: m.eye || '',
+          shape: m.shape || '',
           crown: m.crown, flame: m.flame, spark: m.spark,
           aura: m.aura, fire: m.fire, wing: m.wing,
         });
       }
       this.waves.push({ enemies: enemies, isBoss: false });
     }
+
+    this.totalWaves = normalWaveCount + 1;
 
     // Wave 3: ボス戦
     var bossData = MonsterData.getBoss(world);
