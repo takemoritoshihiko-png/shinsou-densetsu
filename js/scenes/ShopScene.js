@@ -338,6 +338,7 @@ class ShopScene {
     }
 
     ctx.restore();
+// スクロールボタン    var listH = 400;    var maxScroll = Math.max(0, unequipped.length * itemH - listH);    if (maxScroll > 0) {      ctx.font = "bold 16px " + CONFIG.FONT_FAMILY;      ctx.textAlign = "center"; ctx.textBaseline = "middle";      // 上ボタン      ctx.fillStyle = this.scrollY > 0 ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)";      ctx.fillRect(lx + lw - 35, startY, 30, 24);      ctx.fillStyle = this.scrollY > 0 ? "#ffffff" : "#555";      ctx.fillText("^", lx + lw - 20, startY + 12);      // 下ボタン      ctx.fillStyle = this.scrollY < maxScroll ? "rgba(255,255,255,0.2)" : "rgba(255,255,255,0.05)";      ctx.fillRect(lx + lw - 35, startY + listH - 24, 30, 24);      ctx.fillStyle = this.scrollY < maxScroll ? "#ffffff" : "#555";      ctx.fillText("v", lx + lw - 20, startY + listH - 12);      // スクロールバー      var barH2 = Math.max(20, listH * listH / (unequipped.length * itemH));      var barY2 = startY + (this.scrollY / maxScroll) * (listH - barH2);      ctx.fillStyle = "rgba(255,255,255,0.25)";      ctx.fillRect(lx + lw - 4, barY2, 3, barH2);    }    this._sellScrollMax = maxScroll;    this._sellStartY = startY;    this._sellLx = lx;    this._sellLw = lw;
 
     if (unequipped.length === 0) {
       ctx.font = '14px ' + CONFIG.FONT_FAMILY;
@@ -492,6 +493,7 @@ class ShopScene {
   }
 
   _onTapSell(x, y) {
+// スクロールボタン処理    if (this._sellScrollMax > 0 && this._sellLx) {      var sbx2 = this._sellLx + this._sellLw - 35;      if (x >= sbx2 && x <= sbx2 + 30 && y >= this._sellStartY && y <= this._sellStartY + 24) {        this.scrollY = Math.max(0, this.scrollY - 120);        return;      }      if (x >= sbx2 && x <= sbx2 + 30 && y >= this._sellStartY + 400 - 24 && y <= this._sellStartY + 400) {        this.scrollY = Math.min(this._sellScrollMax, this.scrollY + 120);        return;      }    }
     var unequipped = this.equip.getUnequippedInventory();
     var lx = 30, lw = 900, startY = 88, itemH = 48;
     for (var i = 0; i < unequipped.length; i++) {
