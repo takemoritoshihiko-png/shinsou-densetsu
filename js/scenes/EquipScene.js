@@ -1,3 +1,4 @@
+// EquipScene v1774002473
 // 装備画面
 class EquipScene {
   constructor(sceneManager, player, equipSystem) {
