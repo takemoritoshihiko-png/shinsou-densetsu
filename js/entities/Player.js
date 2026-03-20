@@ -470,12 +470,39 @@ class Player {
     ctx.shadowBlur = 0;
     ctx.restore();
 
-    // === 攻撃フラッシュ ===
+    // === 剣を振るエフェクト ===
     if (justAttacked) {
-      ctx.fillStyle = 'rgba(255,255,200,0.4)';
+      ctx.save();
+      ctx.translate(cx, cy);
+      ctx.rotate(dirAngle);
+      // 剣の軌跡（弧）
+      var slashProgress = this.attackTimer / 0.08;
+      var slashAngle = -Math.PI * 0.6 + slashProgress * Math.PI * 1.2;
+      ctx.strokeStyle = 'rgba(255,255,220,0.8)';
+      ctx.lineWidth = 3;
       ctx.beginPath();
-      ctx.arc(cx, cy, 22, 0, Math.PI * 2);
+      ctx.arc(0, 0, 30, slashAngle - 0.8, slashAngle + 0.3);
+      ctx.stroke();
+      // 剣身
+      ctx.save();
+      ctx.rotate(slashAngle);
+      ctx.fillStyle = '#ddeeff';
+      ctx.beginPath();
+      ctx.moveTo(12, -2);
+      ctx.lineTo(35, -1);
+      ctx.lineTo(38, 0);
+      ctx.lineTo(35, 1);
+      ctx.lineTo(12, 2);
+      ctx.closePath();
       ctx.fill();
+      // 光の尾
+      ctx.strokeStyle = 'rgba(255,255,200,0.5)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(0, 0, 28, slashAngle - 1.2, slashAngle - 0.2);
+      ctx.stroke();
+      ctx.restore();
+      ctx.restore();
     }
 
     // === 移動時のほこり ===

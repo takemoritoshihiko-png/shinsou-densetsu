@@ -28,10 +28,10 @@ class InputManager {
   _createPadButtons() {
     var W = CONFIG.CANVAS_WIDTH;
     var H = CONFIG.CANVAS_HEIGHT;
-    var mr = 70;
-    var ar = 65;
+    var mr = 47;
+    var ar = 43;
     var dpadCx = 120, dpadCy = H - 130;
-    var dpadSpread = 80;
+    var dpadSpread = 54;
     return {
       left:  { x: dpadCx - dpadSpread, y: dpadCy, r: mr, label: '<', key: 'left', color: '#ffffff' },
       right: { x: dpadCx + dpadSpread, y: dpadCy, r: mr, label: '>', key: 'right', color: '#ffffff' },
@@ -40,7 +40,7 @@ class InputManager {
       physical: { x: W - 250, y: H - 90, r: ar, label: 'ATK', key: 'physical', color: '#cc4444' },
       magical:  { x: W - 100, y: H - 90, r: ar, label: 'MAG', key: 'magical', color: '#4488ff' },
       ultimate: { x: W - 175, y: H - 220, r: ar, label: 'ULT', key: 'ultimate', color: '#ffd700' },
-      autoBtn:  { x: W - 60, y: H - 220, r: 45, label: 'AUTO', key: 'auto_toggle', color: '#44ff88' },
+      autoBtn:  { x: W - 60, y: H - 220, r: 30, label: 'AUTO', key: 'auto_toggle', color: '#44ff88' },
     };
   }
 
@@ -140,7 +140,7 @@ class InputManager {
     ctx.globalAlpha = 0.2;
     ctx.fillStyle = '#ffffff';
     ctx.beginPath();
-    ctx.arc(dpadCx, dpadCy, 24, 0, Math.PI * 2);
+    ctx.arc(dpadCx, dpadCy, 16, 0, Math.PI * 2);
     ctx.fill();
     ctx.restore();
 
