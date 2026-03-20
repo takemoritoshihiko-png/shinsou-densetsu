@@ -347,6 +347,9 @@ class StageSelectScene {
     var world = this.selectedWorld;
     var H = CONFIG.CANVAS_HEIGHT;
     var cx = W / 2;
+    var startY = 160;
+    var endY = H - 60;
+
     var positions = [
       { x: cx - 120, y: startY },
       { x: cx + 100, y: startY + (endY - startY) * 0.33 },
@@ -354,17 +357,24 @@ class StageSelectScene {
       { x: cx,       y: endY },
     ];
 
+    for (var s = 0; s < 4; s++) {
+      var pos = positions[s];
+      var stage = s + 1;
+      var dx = x - pos.x;
+      var dy = y - pos.y;
+      var hitR = stage === 4 ? 38 : 32;
+
       if (dx * dx + dy * dy <= hitR * hitR) {
         if (this._isUnlocked(world, stage) && !this._isCleared(world, stage)) {
           this._startBattle(world, stage);
         } else if (this._isCleared(world, stage)) {
-          // クリア済みでも再挑戦可能
           this._startBattle(world, stage);
         }
         return;
       }
     }
   }
+
 
   _startBattle(world, stage) {
     // ステージ1で初回アクセス時にストーリー表示
