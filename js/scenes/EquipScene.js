@@ -192,7 +192,79 @@ class EquipScene {
     }
   }
 
-  // --- 右: バッグ一覧 ---
+
+    // --- 選択中装備の詳細 ---
+    var selItem = this.previewUid ? this.equip.getByUid(this.previewUid) : this.equip.getEquippedItem(this.selectedSlot);
+    if (selItem) {
+      var dy = py + 270;
+      var rc = EquipmentData.RANK_COLORS[selItem.rank];
+
+      // 装備名
+      ctx.font = 'bold 12px ' + CONFIG.FONT_FAMILY;
+      ctx.textAlign = 'left';
+      ctx.fillStyle = rc;
+      ctx.fillText(selItem.name, px + 8, dy);
+
+      // 基本ステ
+      dy += 18;
+      ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+      ctx.fillStyle = '#aaa';
+      ctx.fillText('[基本]', px + 8, dy);
+      dy += 14;
+      ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+      var bKeys = EquipmentData.STAT_KEYS;
+      var bLabels = ['HP','MP','ATK','MATK','DEF','MDEF','SPD','CRIT'];
+      var bx2 = px + 8;
+      for (var bi = 0; bi < bKeys.length; bi++) {
+        var bv = selItem.baseStats[bKeys[bi]] || 0;
+        if (bv === 0) continue;
+        ctx.fillStyle = '#cccccc';
+        ctx.fillText(bLabels[bi] + '+' + bv, bx2, dy);
+        bx2 += 52;
+        if (bx2 > px + pw - 20) { bx2 = px + 8; dy += 14; }
+      }
+
+      // 固有特性
+      dy += 18;
+      ctx.fillStyle = '#ffaa44';
+      ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+      ctx.fillText('[固有特性]', px + 8, dy);
+      dy += 14;
+      if (selItem.innateTraits && selItem.innateTraits.length > 0) {
+        for (var ti = 0; ti < selItem.innateTraits.length; ti++) {
+          var tr = selItem.innateTraits[ti];
+          var tDef = EquipmentData.getTraitDef(tr.id);
+          ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+          ctx.fillStyle = '#ffcc66';
+          ctx.fillText((tDef ? tDef.label : '?') + ' +' + tr.value + (tDef ? tDef.unit : ''), px + 12, dy);
+          dy += 14;
+        }
+      } else {
+        ctx.fillStyle = '#555'; ctx.fillText('なし', px + 12, dy); dy += 14;
+      }
+
+      // スロット特性
+      dy += 4;
+      ctx.fillStyle = '#88ccff';
+      ctx.font = '10px ' + CONFIG.FONT_FAMILY;
+      ctx.fillText('[スロット]', px + 8, dy);
+      dy += 14;
+      if (selItem.slots && selItem.slots.length > 0) {
+        for (var si = 0; si < selItem.slots.length; si++) {
+          var sl = selItem.slots[si];
+          if (!sl) { ctx.fillStyle = '#555'; ctx.fillText('(空)', px + 12, dy); dy += 14; continue; }
+          var sDef = SlotTraitData.getDef(sl.id);
+          var sCol = SlotTraitData.getColor(sl.id);
+          ctx.fillStyle = sCol;
+          ctx.font = '11px ' + CONFIG.FONT_FAMILY;
+          ctx.fillText((sDef ? sDef.label : '?') + ' +' + sl.value + (sDef ? sDef.unit : ''), px + 12, dy);
+          dy += 14;
+        }
+      } else {
+        ctx.fillStyle = '#555'; ctx.fillText('なし', px + 12, dy);
+      }
+    }
+
   _renderBag(ctx) {
     var bx = 445, by = 65, bw = 500, bh = 430;
 
