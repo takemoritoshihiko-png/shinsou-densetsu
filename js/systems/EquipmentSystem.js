@@ -17,7 +17,7 @@ class EquipmentSystem {
     this.mpPotions = 2;
 
     // 売却基本価格
-    this.SELL_PRICES = { common: 10, uncommon: 50, rare: 200, epic: 800, legend: 3000 };
+    this.SELL_PRICES = { common: 80, uncommon: 300, rare: 1000, epic: 4000, legend: 15000 };
 
     // 装備プリセット（最大5セット）
     this.presets = []; // [{ name, equipped: {weapon:uid,...} }]
@@ -206,9 +206,19 @@ class EquipmentSystem {
 
   // 売却額を計算
   getSellPrice(item) {
-    var base = this.SELL_PRICES[item.rank] || 10;
-    var upgMul = 1 + (item.upgradeLevel || 0) * 0.2;
-    return Math.floor(base * upgMul);
+    var base = this.SELL_PRICES[item.rank] || 80;
+    var upgMul = 1 + (item.upgradeLevel || 0) * 0.5;
+    // ステータス合計に応じたボーナス
+    var statTotal = 0;
+    var keys = EquipmentData.STAT_KEYS;
+    for (var i = 0; i < keys.length; i++) {
+      statTotal += (item.baseStats[keys[i]] || 0);
+    }
+    // スロット特性数ボーナス
+    var slotBonus = item.slots ? item.slots.length * 50 : 0;
+    // 固有特性ボーナス
+    var traitBonus = item.innateTraits ? item.innateTraits.length * 100 : 0;
+    return Math.floor((base + statTotal * 2 + slotBonus + traitBonus) * upgMul);
   }
 
   // 装備を売却（インベントリから削除）
