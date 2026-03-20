@@ -103,13 +103,28 @@ class PartySystem {
     if (!ch) return {};
     var base = ClassData.getPassiveBuff(ch.job);
     var elvl = ch.enhanceLevel || 1;
-    // 1レベルにつき基本値の10%アップ → Lv1=100%, Lv10=190%(≒2倍)
-    var mul = 1 + (elvl - 1) * 0.1;
+    var charLv = ch.level || 1;
+    var rarity = ch.rarity || 'N';
+
+    // 強化レベル倍率: Lv1=100%, Lv10=190%
+    var enhanceMul = 1 + (elvl - 1) * 0.1;
+
+    // レアリティ倍率: N=1.0, R=1.3, SR=1.6, SSR=2.2, UR=3.0
+    var rarityMul = { N: 1.0, R: 1.3, SR: 1.6, SSR: 2.2, UR: 3.0 };
+    var rMul = rarityMul[rarity] || 1.0;
+
+    // キャラレベル倍率: Lv1=100%, Lv50で150%, Lv99で200%
+    var lvMul = 1 + (charLv - 1) * 0.01;
+
+    var totalMul = enhanceMul * rMul * lvMul;
+
     var result = {};
     for (var key in base) {
-      result[key] = Math.round(base[key] * mul * 10) / 10;
+      result[key] = Math.round(base[key] * totalMul * 10) / 10;
     }
     return result;
+  }
+
   }
 
   // 前衛全員のパッシブバフを統合して返す（強化倍率込み）
@@ -160,7 +175,7 @@ class PartySystem {
       if (buff.damage_reduction) parts.push('被ダメ-' + buff.damage_reduction + '%');
       if (buff.hp_regen_per_sec) parts.push('HP回復' + buff.hp_regen_per_sec + '%/s');
       var desc = parts.join(' ');
-      if (ch.enhanceLevel > 1) desc += ' (強化Lv.' + ch.enhanceLevel + ')';
+      desc += ' [' + ch.rarity + ' Lv.' + (ch.level || 1) + ' 強化' + (ch.enhanceLevel || 1) + ']';
       descs.push({ name: ch.name, job: jobData.name, desc: desc, color: jobData.color });
     }
     return descs;
