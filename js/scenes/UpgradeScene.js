@@ -490,7 +490,7 @@ ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(10,430,40,24);ctx.fillRect(10
     ctx.font = '11px ' + CONFIG.FONT_FAMILY;
     ctx.fillStyle = '#888888';
     ctx.fillText(isEmpty ? '空スロットに新しい特性を付与' : '特性をランダムに入れ替え', ax + 16, ry1 + 48);
-    ctx.fillText('ショップ: 500 GOLD', ax + 16, ry1 + 66);
+    ctx.fillText('ショップ: 3000 GOLD', ax + 16, ry1 + 66);
 
     if (canReroll) {
       ctx.fillStyle = 'rgba(68,170,255,0.2)';
@@ -548,7 +548,7 @@ ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(10,430,40,24);ctx.fillRect(10
     var buyReroll = { x: ax + 10, y: shopY + 18, w: 135, h: 34 };
     var buyErase  = { x: ax + 155, y: shopY + 18, w: 135, h: 34 };
 
-    var canBuyR = this.player.ownedGold >= 500;
+    var canBuyR = this.player.ownedGold >= 3000;
     ctx.fillStyle = canBuyR ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';
     ctx.strokeStyle = canBuyR ? '#44aaff' : '#444';
     ctx.lineWidth = 1;
@@ -558,7 +558,7 @@ ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(10,430,40,24);ctx.fillRect(10
     ctx.fillStyle = canBuyR ? '#ffffff' : '#555';
     ctx.fillText('再抽選の石', buyReroll.x + buyReroll.w / 2, buyReroll.y + 12);
     ctx.fillStyle = canBuyR ? '#ffcc00' : '#555';
-    ctx.fillText('500G', buyReroll.x + buyReroll.w / 2, buyReroll.y + 26);
+    ctx.fillText('3000G', buyReroll.x + buyReroll.w / 2, buyReroll.y + 26);
 
     var canBuyE = this.player.ownedGold >= 5000;
     ctx.fillStyle = canBuyE ? 'rgba(255,255,255,0.06)' : 'rgba(255,255,255,0.02)';
@@ -795,8 +795,8 @@ ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(10,430,40,24);ctx.fillRect(10
     // ショップ購入
     var shopY = 55 + 38 + 120 + 12 + 120 + 16;
     if (y >= shopY + 18 && y <= shopY + 52) {
-      if (x >= ax + 10 && x <= ax + 145 && this.player.ownedGold >= 500) {
-        this.player.ownedGold -= 500;
+      if (x >= ax + 10 && x <= ax + 145 && this.player.ownedGold >= 3000) {
+        this.player.ownedGold -= 3000;
         this.equip.rerollStones++;
         return;
       }

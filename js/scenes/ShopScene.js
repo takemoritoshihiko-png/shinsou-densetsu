@@ -203,7 +203,7 @@ class ShopScene {
     var items = [
       { id: 'hpPot',    name: 'HPポーション',  price: 50,   desc: 'HP 30%回復',     count: this.equip.hpPotions },
       { id: 'mpPot',    name: 'MPポーション',  price: 80,   desc: 'MP 30%回復',     count: this.equip.mpPotions },
-      { id: 'reroll',   name: '再抽選の石',    price: 500,  desc: 'スロット特性を再抽選', count: this.equip.rerollStones },
+      { id: 'reroll',   name: '再抽選の石',    price: 3000,  desc: 'スロット特性を再抽選', count: this.equip.rerollStones },
       { id: 'erase',    name: '消去の石',      price: 5000, desc: 'スロット特性を消去',   count: this.equip.eraseStones },
     ];
     this._renderShopList(ctx, items, '消耗品');
@@ -211,12 +211,18 @@ class ShopScene {
 
   // ===== 素材タブ =====
   _renderMaterialTab(ctx) {
+  _renderMaterialTab(ctx) {
     var items = [
-      { id: 'enhMat',   name: '強化素材',      price: 200,  desc: '仲間の強化に使用', count: this.party ? (this.party.enhanceMaterials || 0) : 0 },
-      { id: 'coreC',    name: 'コモンコア',    price: 300,  desc: '装備強化+値', count: this.equip.cores.common },
+      { id: 'enhMat',   name: '強化素材',        price: 200,   desc: '仲間の強化に使用', count: this.party ? (this.party.enhanceMaterials || 0) : 0 },
+      { id: 'coreC',    name: 'コモンコア',      price: 300,   desc: '装備強化+値', count: this.equip.cores.common },
+      { id: 'coreU',    name: 'アンコモンコア',  price: 800,   desc: '装備強化+値', count: this.equip.cores.uncommon },
+      { id: 'coreR',    name: 'レアコア',        price: 2000,  desc: '装備強化+値', count: this.equip.cores.rare },
+      { id: 'coreE',    name: 'エピックコア',    price: 5000,  desc: '装備強化+値', count: this.equip.cores.epic },
+      { id: 'coreL',    name: 'レジェンドコア',  price: 10000, desc: '装備強化+値', count: this.equip.cores.legend },
     ];
-    this._renderShopList(ctx, items, '素材（上位コアはドロップのみ）');
+    this._renderShopList(ctx, items, '素材・コア');
   }
+
 
   _renderShopList(ctx, items, header) {
     var lx = 30, ly = 60, lw = 900, itemH = 65;
@@ -470,7 +476,7 @@ class ShopScene {
     var items = [
       { id: 'hpPot', price: 50 },
       { id: 'mpPot', price: 80 },
-      { id: 'reroll', price: 500 },
+      { id: 'reroll', price: 3000 },
       { id: 'erase', price: 5000 },
     ];
     var lx = 30, lw = 900, startY = 88, itemH = 65;
@@ -494,6 +500,10 @@ class ShopScene {
     var items = [
       { id: 'enhMat', price: 200 },
       { id: 'coreC', price: 300 },
+      { id: 'coreU', price: 800 },
+      { id: 'coreR', price: 2000 },
+      { id: 'coreE', price: 5000 },
+      { id: 'coreL', price: 10000 },
     ];
     var lx = 30, lw = 900, startY = 88, itemH = 65;
     for (var i = 0; i < items.length; i++) {
@@ -506,14 +516,17 @@ class ShopScene {
             if (this.party) this.party.enhanceMaterials = (this.party.enhanceMaterials || 0) + 1;
             this._showMsg('強化素材 を購入');
           }
-          else if (it.id === 'coreC') {
-            this.equip.cores.common++;
-            this._showMsg('コモンコア を購入');
-          }
+          else if (it.id === 'coreC') { this.equip.cores.common++; this._showMsg('コモンコア を購入'); }
+          else if (it.id === 'coreU') { this.equip.cores.uncommon++; this._showMsg('アンコモンコア を購入'); }
+          else if (it.id === 'coreR') { this.equip.cores.rare++; this._showMsg('レアコア を購入'); }
+          else if (it.id === 'coreE') { this.equip.cores.epic++; this._showMsg('エピックコア を購入'); }
+          else if (it.id === 'coreL') { this.equip.cores.legend++; this._showMsg('レジェンドコア を購入'); }
         }
         return;
       }
     }
+  }
+
   }
 
   _onTapSell(x, y) {
