@@ -14,7 +14,7 @@ var DropSystem = {
     7:  { common: 18, uncommon: 38, rare: 30, epic: 11, legend: 3 },
     8:  { common: 8,  uncommon: 32, rare: 38, epic: 18, legend: 4 },
     9:  { common: 3,  uncommon: 22, rare: 40, epic: 28, legend: 7 },
-    10: { common: 0,  uncommon: 10, rare: 38, epic: 42, legend: 10 },
+    10: { common: 0,  uncommon: 5,  rare: 20, epic: 35, legend: 40 },
     // ボス専用テーブル（各ワールドのボスが使用 — 通常より1段階良い）
     boss1:  { common: 70, uncommon: 24, rare: 4, epic: 1, legend: 1 },
     boss2:  { common: 58, uncommon: 30, rare: 9, epic: 2, legend: 1 },
