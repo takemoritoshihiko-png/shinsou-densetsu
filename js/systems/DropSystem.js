@@ -30,12 +30,12 @@ var DropSystem = {
 
   // ドロップ確率
   RATES: {
-    equipment:    20, // %
-    core:          5,
-    rerollStone:   8,
-    eraseStone:    3,
-    enhanceMat:   15,
-    potion:       20,
+    equipment:    25, // %
+    core:          3,
+    rerollStone:   5,
+    eraseStone:    2,
+    enhanceMat:   10,
+    potion:       10,
   },
 
   RANK_COLORS: { common: '#aaaaaa', uncommon: '#44cc44', rare: '#4488ff', epic: '#bb44ff', legend: '#ffd700' },
