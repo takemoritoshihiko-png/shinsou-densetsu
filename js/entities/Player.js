@@ -162,128 +162,332 @@ class Player {
     }
   }
 
+
   render(ctx) {
-    var jobData = ClassData.get(this.job);
-    var jc = jobData ? jobData.color : '#4488ff';
     var cx = this.x + this.width / 2;
     var cy = this.y + this.height / 2;
     var time = Date.now();
     var isMoving = Math.abs(this.vx) > 5 || Math.abs(this.vy) > 5;
     var bobY = isMoving ? Math.sin(time * 0.012) * 2 : 0;
-    var weaponColor = '#888888';
-    var armorColor = jc;
-    var weaponRank = 'common';
-    if (this.equipSystem) {
-      var wep = this.equipSystem.getEquippedItem('weapon');
-      if (wep) { weaponColor = EquipmentData.RANK_COLORS[wep.rank] || '#888'; weaponRank = wep.rank; }
-      var bod = this.equipSystem.getEquippedItem('body');
-      if (bod) armorColor = EquipmentData.RANK_COLORS[bod.rank] || jc;
-    }
     var justAttacked = this.attackTimer < 0.08 && this.attackTimer > 0;
 
-    ctx.save();
-
-    // 影
-    ctx.fillStyle = 'rgba(0,0,0,0.25)';
-    ctx.beginPath();
-    ctx.ellipse(cx, cy + 16, 12, 5, 0, 0, Math.PI * 2);
-    ctx.fill();
-
-    // 向き
+    // 向き角度
     var dirAngle = 0;
     if (this.facing === 'up') dirAngle = -Math.PI / 2;
     else if (this.facing === 'down') dirAngle = Math.PI / 2;
     else if (this.facing === 'left') dirAngle = Math.PI;
-    else dirAngle = 0;
 
-    // 体 (丸い)
-    ctx.fillStyle = armorColor;
+    ctx.save();
+
+    // === 影 ===
+    ctx.fillStyle = 'rgba(0,0,0,0.3)';
     ctx.beginPath();
-    ctx.arc(cx, cy + bobY, 12, 0, Math.PI * 2);
-    ctx.fill();
-    // 体ハイライト
-    ctx.fillStyle = 'rgba(255,255,255,0.15)';
-    ctx.beginPath();
-    ctx.arc(cx - 3, cy - 3 + bobY, 6, 0, Math.PI * 2);
+    ctx.ellipse(cx, cy + 18, 14, 5, 0, 0, Math.PI * 2);
     ctx.fill();
 
-    // 頭 (大きめ)
-    var headY = cy - 10 + bobY;
-    ctx.fillStyle = '#f0c8a0';
+    // === ブーツ（茶色の革ブーツ） ===
+    var bootY = cy + 10 + bobY;
+    var legAnim = isMoving ? Math.sin(time * 0.015) * 3 : 0;
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(cx - 8, bootY + legAnim, 6, 8);
+    ctx.fillRect(cx + 2, bootY - legAnim, 6, 8);
+    // ブーツの折り返し
+    ctx.fillStyle = '#A07818';
+    ctx.fillRect(cx - 8, bootY + legAnim, 6, 3);
+    ctx.fillRect(cx + 2, bootY - legAnim, 6, 3);
+
+    // === タイツ（ベージュのズボン） ===
+    var legY = cy + 4 + bobY;
+    ctx.fillStyle = '#D2C4A0';
+    ctx.fillRect(cx - 7, legY + legAnim, 5, 8);
+    ctx.fillRect(cx + 2, legY - legAnim, 5, 8);
+
+    // === 緑のチュニック（胴体） ===
+    var bodyY = cy - 8 + bobY;
+    ctx.fillStyle = '#3D7A2A';
     ctx.beginPath();
-    ctx.arc(cx, headY, 10, 0, Math.PI * 2);
+    ctx.moveTo(cx - 12, bodyY);
+    ctx.lineTo(cx + 12, bodyY);
+    ctx.lineTo(cx + 10, cy + 8 + bobY);
+    ctx.lineTo(cx - 10, cy + 8 + bobY);
+    ctx.closePath();
+    ctx.fill();
+    // チュニック裾（少し広がる）
+    ctx.fillStyle = '#357024';
+    ctx.beginPath();
+    ctx.moveTo(cx - 11, cy + 2 + bobY);
+    ctx.lineTo(cx + 11, cy + 2 + bobY);
+    ctx.lineTo(cx + 14, cy + 10 + bobY);
+    ctx.lineTo(cx - 14, cy + 10 + bobY);
+    ctx.closePath();
+    ctx.fill();
+    // チュニックの装飾ライン（裾の模様）
+    ctx.strokeStyle = '#A8D48A';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, cy + 8 + bobY);
+    ctx.lineTo(cx + 10, cy + 8 + bobY);
+    ctx.stroke();
+    // Vネック
+    ctx.strokeStyle = '#2D5A1E';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.moveTo(cx - 4, bodyY);
+    ctx.lineTo(cx, bodyY + 6);
+    ctx.lineTo(cx + 4, bodyY);
+    ctx.stroke();
+
+    // === ベルト（茶革ベルト＋バックル） ===
+    ctx.fillStyle = '#6B4C1E';
+    ctx.fillRect(cx - 11, cy + bobY, 22, 4);
+    // バックル（青い宝石風）
+    ctx.fillStyle = '#3388BB';
+    ctx.beginPath();
+    ctx.arc(cx, cy + 2 + bobY, 2.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#AA8833';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+
+    // === クロスベルト（X字のストラップ） ===
+    ctx.strokeStyle = '#7B5B2E';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(cx - 10, bodyY + 2);
+    ctx.lineTo(cx + 6, cy + bobY);
+    ctx.stroke();
+    ctx.beginPath();
+    ctx.moveTo(cx + 10, bodyY + 2);
+    ctx.lineTo(cx - 6, cy + bobY);
+    ctx.stroke();
+
+    // === 腕（肌色＋腕当て） ===
+    ctx.fillStyle = '#F0C8A0';
+    ctx.fillRect(cx - 14, bodyY + 4 + bobY, 4, 10);
+    ctx.fillRect(cx + 10, bodyY + 4 + bobY, 4, 10);
+    // 腕当て（革のアームガード）
+    ctx.fillStyle = '#8B6914';
+    ctx.fillRect(cx - 14, bodyY + 6 + bobY, 4, 5);
+    ctx.fillRect(cx + 10, bodyY + 6 + bobY, 4, 5);
+
+    // === 盾（左手側 - 紋章付き） ===
+    if (this.facing !== 'up') {
+      var shX = cx - 18, shY = bodyY + 2 + bobY;
+      // 盾本体（青紫色）
+      ctx.fillStyle = '#2244AA';
+      ctx.beginPath();
+      ctx.moveTo(shX + 5, shY);
+      ctx.lineTo(shX + 13, shY + 1);
+      ctx.lineTo(shX + 14, shY + 10);
+      ctx.lineTo(shX + 9, shY + 16);
+      ctx.lineTo(shX + 4, shY + 10);
+      ctx.lineTo(shX + 3, shY + 1);
+      ctx.closePath();
+      ctx.fill();
+      // 盾の縁（銀色）
+      ctx.strokeStyle = '#AABBCC';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+      // 紋章（三角の翼模様）
+      ctx.fillStyle = '#FFD700';
+      ctx.beginPath();
+      ctx.moveTo(shX + 9, shY + 4);
+      ctx.lineTo(shX + 6, shY + 10);
+      ctx.lineTo(shX + 12, shY + 10);
+      ctx.closePath();
+      ctx.fill();
+      // 紋章の鳥（簡易）
+      ctx.strokeStyle = '#CC3333';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(shX + 7, shY + 8);
+      ctx.lineTo(shX + 9, shY + 6);
+      ctx.lineTo(shX + 11, shY + 8);
+      ctx.stroke();
+    }
+
+    // === 頭 ===
+    var headY = cy - 16 + bobY;
+    // 顔（肌色）
+    ctx.fillStyle = '#F0C8A0';
+    ctx.beginPath();
+    ctx.arc(cx, headY, 9, 0, Math.PI * 2);
     ctx.fill();
 
-    // 髪
-    ctx.fillStyle = jc;
+    // === 金髪 ===
+    ctx.fillStyle = '#D4A840';
+    // ベース
     ctx.beginPath();
-    ctx.arc(cx, headY - 2, 11, Math.PI * 1.1, Math.PI * 1.9, true);
+    ctx.arc(cx, headY - 2, 10, Math.PI * 1.05, Math.PI * 1.95, true);
     ctx.fill();
-    // 髪スパイク
+    // 前髪（左右に分かれる）
     ctx.beginPath();
-    ctx.moveTo(cx - 8, headY - 6);
-    ctx.lineTo(cx - 10, headY - 16);
-    ctx.lineTo(cx - 2, headY - 8);
-    ctx.lineTo(cx + 3, headY - 18);
-    ctx.lineTo(cx + 6, headY - 8);
-    ctx.lineTo(cx + 10, headY - 14);
-    ctx.lineTo(cx + 10, headY - 4);
+    ctx.moveTo(cx - 9, headY - 4);
+    ctx.lineTo(cx - 12, headY + 2);
+    ctx.lineTo(cx - 6, headY - 1);
+    ctx.lineTo(cx - 3, headY - 6);
+    ctx.lineTo(cx + 1, headY - 8);
+    ctx.lineTo(cx + 5, headY - 6);
+    ctx.lineTo(cx + 8, headY - 1);
+    ctx.lineTo(cx + 12, headY + 2);
+    ctx.lineTo(cx + 9, headY - 4);
+    ctx.closePath();
+    ctx.fill();
+    // サイドヘア（耳の横に垂れる）
+    ctx.fillStyle = '#C49830';
+    ctx.beginPath();
+    ctx.moveTo(cx - 9, headY);
+    ctx.quadraticCurveTo(cx - 13, headY + 6, cx - 10, headY + 12);
+    ctx.lineTo(cx - 8, headY + 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + 9, headY);
+    ctx.quadraticCurveTo(cx + 13, headY + 6, cx + 10, headY + 12);
+    ctx.lineTo(cx + 8, headY + 2);
     ctx.closePath();
     ctx.fill();
 
-    // 目 (向きで位置変化)
+    // === 尖った耳 ===
+    ctx.fillStyle = '#F0C8A0';
+    ctx.beginPath();
+    ctx.moveTo(cx - 9, headY - 1);
+    ctx.lineTo(cx - 15, headY - 3);
+    ctx.lineTo(cx - 9, headY + 2);
+    ctx.closePath();
+    ctx.fill();
+    ctx.beginPath();
+    ctx.moveTo(cx + 9, headY - 1);
+    ctx.lineTo(cx + 15, headY - 3);
+    ctx.lineTo(cx + 9, headY + 2);
+    ctx.closePath();
+    ctx.fill();
+
+    // === フード（緑、首の後ろに垂れている） ===
+    ctx.fillStyle = '#3D7A2A';
+    ctx.beginPath();
+    ctx.arc(cx, headY - 1, 10.5, Math.PI * 0.85, Math.PI * 0.15, true);
+    ctx.lineTo(cx + 6, bodyY + 3 + bobY);
+    ctx.lineTo(cx - 6, bodyY + 3 + bobY);
+    ctx.closePath();
+    ctx.fill();
+    // フードの折り返し
+    ctx.fillStyle = '#4A8E35';
+    ctx.beginPath();
+    ctx.arc(cx, headY - 1, 10.5, Math.PI * 0.9, Math.PI * 0.1, true);
+    ctx.closePath();
+    ctx.fill();
+
+    // === 目（青い目） ===
     var eyeOff = { x: 0, y: 0 };
-    if (this.facing === 'left') eyeOff.x = -3;
-    else if (this.facing === 'right') eyeOff.x = 3;
+    if (this.facing === 'left') eyeOff.x = -2;
+    else if (this.facing === 'right') eyeOff.x = 2;
     else if (this.facing === 'up') eyeOff.y = -2;
-    else eyeOff.y = 2;
+    else eyeOff.y = 1;
 
     if (this.facing !== 'up') {
+      // 白目
       ctx.fillStyle = '#ffffff';
-      ctx.beginPath(); ctx.ellipse(cx - 4 + eyeOff.x, headY + eyeOff.y, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(cx + 4 + eyeOff.x, headY + eyeOff.y, 3, 3.5, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = jc;
-      ctx.beginPath(); ctx.arc(cx - 3.5 + eyeOff.x * 0.5, headY + 0.5 + eyeOff.y * 0.5, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + 4.5 + eyeOff.x * 0.5, headY + 0.5 + eyeOff.y * 0.5, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.fillStyle = '#111';
-      ctx.beginPath(); ctx.arc(cx - 3.5 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 1, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + 4.5 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 1, 0, Math.PI * 2); ctx.fill();
-      // 光
-      ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(cx - 4.5 + eyeOff.x, headY - 1 + eyeOff.y * 0.3, 0.8, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(cx + 3.5 + eyeOff.x, headY - 1 + eyeOff.y * 0.3, 0.8, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx - 3.5 + eyeOff.x, headY + eyeOff.y, 2.5, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.ellipse(cx + 3.5 + eyeOff.x, headY + eyeOff.y, 2.5, 3, 0, 0, Math.PI * 2);
+      ctx.fill();
+      // 虹彩（青）
+      ctx.fillStyle = '#4488CC';
+      ctx.beginPath();
+      ctx.arc(cx - 3 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 4 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 1.8, 0, Math.PI * 2);
+      ctx.fill();
+      // 瞳孔
+      ctx.fillStyle = '#112244';
+      ctx.beginPath();
+      ctx.arc(cx - 3 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 0.9, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 4 + eyeOff.x, headY + 0.5 + eyeOff.y * 0.5, 0.9, 0, Math.PI * 2);
+      ctx.fill();
+      // 光の反射
+      ctx.fillStyle = '#ffffff';
+      ctx.beginPath();
+      ctx.arc(cx - 3.8 + eyeOff.x, headY - 0.8, 0.6, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(cx + 3.2 + eyeOff.x, headY - 0.8, 0.6, 0, Math.PI * 2);
+      ctx.fill();
+      // 眉（凛々しい）
+      ctx.strokeStyle = '#8B7030';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(cx - 5.5, headY - 3.5);
+      ctx.lineTo(cx - 1, headY - 3);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(cx + 1, headY - 3);
+      ctx.lineTo(cx + 5.5, headY - 3.5);
+      ctx.stroke();
+      // 口（真一文字の決意の表情）
+      ctx.strokeStyle = '#BB8866';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(cx - 2, headY + 4);
+      ctx.lineTo(cx + 2, headY + 4);
+      ctx.stroke();
     }
 
-    // 武器 (向きに合わせて描画)
+    // === 剣（背中に斜めに差している） ===
     ctx.save();
     ctx.translate(cx, cy + bobY);
     ctx.rotate(dirAngle);
-    // 剣
-    if (weaponRank === 'epic' || weaponRank === 'legend') {
-      ctx.shadowColor = weaponRank === 'legend' ? '#ffd700' : '#bb44ff';
-      ctx.shadowBlur = 8;
-    }
-    ctx.fillStyle = weaponColor;
-    ctx.fillRect(12, -2, 16, 4);
+    // 鞘（紫の柄が見える）
+    ctx.fillStyle = '#665588';
+    ctx.fillRect(4, -22, 3, 14);
+    // 剣身
+    ctx.fillStyle = '#C0C8D8';
+    ctx.fillRect(3, -28, 5, 8);
     // 剣先
     ctx.beginPath();
-    ctx.moveTo(28, -3);
-    ctx.lineTo(34, 0);
-    ctx.lineTo(28, 3);
+    ctx.moveTo(3, -28);
+    ctx.lineTo(5.5, -34);
+    ctx.lineTo(8, -28);
     ctx.closePath();
     ctx.fill();
-    // ハイライト
+    // ガード（翼型）
+    ctx.fillStyle = '#665588';
+    ctx.beginPath();
+    ctx.moveTo(0, -8);
+    ctx.lineTo(5.5, -10);
+    ctx.lineTo(11, -8);
+    ctx.lineTo(5.5, -7);
+    ctx.closePath();
+    ctx.fill();
+    // 剣のハイライト
     ctx.fillStyle = 'rgba(255,255,255,0.3)';
-    ctx.fillRect(14, -1, 12, 1);
+    ctx.fillRect(5, -28, 1.5, 18);
     ctx.shadowBlur = 0;
     ctx.restore();
 
-    // 攻撃フラッシュ
+    // === 攻撃フラッシュ ===
     if (justAttacked) {
-      ctx.fillStyle = 'rgba(255,255,255,0.3)';
+      ctx.fillStyle = 'rgba(255,255,200,0.4)';
       ctx.beginPath();
-      ctx.arc(cx, cy, 20, 0, Math.PI * 2);
+      ctx.arc(cx, cy, 22, 0, Math.PI * 2);
       ctx.fill();
+    }
+
+    // === 移動時のほこり ===
+    if (isMoving) {
+      ctx.fillStyle = 'rgba(180,160,130,0.3)';
+      for (var di = 0; di < 2; di++) {
+        var dx2 = cx + Math.sin(time * 0.01 + di * 3) * 8;
+        var dy2 = cy + 16 + Math.cos(time * 0.012 + di * 2) * 3;
+        ctx.beginPath();
+        ctx.arc(dx2, dy2, 2, 0, Math.PI * 2);
+        ctx.fill();
+      }
     }
 
     ctx.restore();
