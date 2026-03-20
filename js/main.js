@@ -238,5 +238,15 @@ sceneManager.register('saveload', new SaveLoadScene(sceneManager, gameState));
     lastTime = timestamp;
     requestAnimationFrame(loop);
   });
-} catch(err) { var c=document.getElementById("game-canvas"); if(c){c.width=960;c.height=540;var x=c.getContext("2d");x.fillStyle="#000";x.fillRect(0,0,960,540);x.fillStyle="#f44";x.font="18px sans-serif";x.fillText("ERROR: "+err.message,20,30);x.fillStyle="#fa4";x.font="12px sans-serif";var s=err.stack?err.stack.split("
-"):[]; for(var i=0;i<Math.min(s.length,8);i++){x.fillText(s[i],20,55+i*16);}} console.error(err); } })();
+} catch(err) {
+  var c = document.getElementById('game-canvas');
+  if (c) {
+    c.width = 960; c.height = 540;
+    var x = c.getContext('2d');
+    x.fillStyle = '#000'; x.fillRect(0, 0, 960, 540);
+    x.fillStyle = '#f44'; x.font = '18px sans-serif';
+    x.fillText('ERROR: ' + err.message, 20, 30);
+  }
+  console.error(err);
+}
+})();
