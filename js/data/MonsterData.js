@@ -46,16 +46,16 @@ var MonsterData = {
   ],
 
   BOSSES: {
-    1:  { id:'b01', name:'ゴブリンキング',   hp:2000,   atk:80,   matk:0,   def:35,  mdef:18,  spd:35, exp:60,   gold:40,   color:'#448822' },
-    2:  { id:'b02', name:'海竜',             hp:3500,   atk:120,  matk:50,  def:50,  mdef:35,  spd:40, exp:100,  gold:70,   color:'#2266aa' },
-    3:  { id:'b03', name:'森の主',           hp:5500,   atk:160,  matk:70,  def:65,  mdef:50,  spd:30, exp:150,  gold:100,  color:'#224411' },
-    4:  { id:'b04', name:'炎帝イフリート',   hp:8000,   atk:220,  matk:120, def:80,  mdef:60,  spd:35, exp:220,  gold:150,  color:'#cc2200' },
-    5:  { id:'b05', name:'氷姫フリージア',   hp:12000,  atk:280,  matk:180, def:100, mdef:90,  spd:40, exp:300,  gold:200,  color:'#88ccee' },
-    6:  { id:'b06', name:'砂王ファラオ',     hp:18000,  atk:350,  matk:220, def:120, mdef:110, spd:38, exp:400,  gold:280,  color:'#ccaa22' },
-    7:  { id:'b07', name:'闇将軍ダリウス',   hp:28000,  atk:450,  matk:300, def:150, mdef:140, spd:42, exp:550,  gold:380,  color:'#221144' },
-    8:  { id:'b08', name:'天使長ミカエル',   hp:45000,  atk:580,  matk:400, def:190, mdef:180, spd:50, exp:800,  gold:550,  color:'#eeeeff' },
-    9:  { id:'b09', name:'魔王ルシファー',   hp:70000,  atk:750,  matk:550, def:240, mdef:220, spd:50, exp:1200, gold:850,  color:'#660022' },
-    10: { id:'b10', name:'終焉の神',         hp:120000, atk:1000, matk:750, def:300, mdef:280, spd:55, exp:2500, gold:1800, color:'#ffd700' },
+    1:  { id:'b01', name:'ゴブリンキング',   hp:1333,   atk:80,   matk:0,   def:35,  mdef:18,  spd:35, exp:60,   gold:40,   color:'#448822' },
+    2:  { id:'b02', name:'海竜',             hp:2333,   atk:120,  matk:50,  def:50,  mdef:35,  spd:40, exp:100,  gold:70,   color:'#2266aa' },
+    3:  { id:'b03', name:'森の主',           hp:3666,   atk:160,  matk:70,  def:65,  mdef:50,  spd:30, exp:150,  gold:100,  color:'#224411' },
+    4:  { id:'b04', name:'炎帝イフリート',   hp:5333,   atk:220,  matk:120, def:80,  mdef:60,  spd:35, exp:220,  gold:150,  color:'#cc2200' },
+    5:  { id:'b05', name:'氷姫フリージア',   hp:8000,  atk:280,  matk:180, def:100, mdef:90,  spd:40, exp:300,  gold:200,  color:'#88ccee' },
+    6:  { id:'b06', name:'砂王ファラオ',     hp:12000,  atk:350,  matk:220, def:120, mdef:110, spd:38, exp:400,  gold:280,  color:'#ccaa22' },
+    7:  { id:'b07', name:'闇将軍ダリウス',   hp:18666,  atk:450,  matk:300, def:150, mdef:140, spd:42, exp:550,  gold:380,  color:'#221144' },
+    8:  { id:'b08', name:'天使長ミカエル',   hp:30000,  atk:580,  matk:400, def:190, mdef:180, spd:50, exp:800,  gold:550,  color:'#eeeeff' },
+    9:  { id:'b09', name:'魔王ルシファー',   hp:46666,  atk:750,  matk:550, def:240, mdef:220, spd:50, exp:1200, gold:850,  color:'#660022' },
+    10: { id:'b10', name:'終焉の神',         hp:80000, atk:1000, matk:750, def:300, mdef:280, spd:55, exp:2500, gold:1800, color:'#ffd700' },
   },
 
   WORLD_GRADES: {
