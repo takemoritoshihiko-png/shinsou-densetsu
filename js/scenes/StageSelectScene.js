@@ -216,11 +216,13 @@ class StageSelectScene {
     var endY = H - 60;
     var cx = W / 2;
 
-    // ステージ1〜5を蛇行配置
-var positions = [      { x: cx - 120, y: startY },      { x: cx + 100, y: startY + (endY - startY) * 0.3 },      { x: cx - 80,  y: startY + (endY - startY) * 0.6 },      { x: cx,       y: endY },    ];
+    var positions = [
+      { x: cx - 120, y: startY },
+      { x: cx + 100, y: startY + (endY - startY) * 0.33 },
+      { x: cx - 80,  y: startY + (endY - startY) * 0.66 },
+      { x: cx,       y: endY },
     ];
 
-    // 接続線を先に描画
     ctx.strokeStyle = 'rgba(255,255,255,0.15)';
     ctx.lineWidth = 3;
     ctx.setLineDash([6, 4]);
@@ -346,17 +348,12 @@ var positions = [      { x: cx - 120, y: startY },      { x: cx + 100, y: startY
     var world = this.selectedWorld;
     var H = CONFIG.CANVAS_HEIGHT;
     var cx = W / 2;
-    var startY = 160;
-    var endY = H - 60;
     var positions = [
-      { x: cx - 140, y: startY },
-      { x: cx + 100, y: startY + (endY - startY) * 0.2 },
-      { x: cx - 80,  y: startY + (endY - startY) * 0.42 },
-      { x: cx + 120, y: startY + (endY - startY) * 0.65 },
-var positions = [      { x: cx - 120, y: startY },      { x: cx + 100, y: startY + (endY - startY) * 0.3 },      { x: cx - 80,  y: startY + (endY - startY) * 0.6 },      { x: cx,       y: endY },    ];
-      var dx = x - pos.x;
-      var dy = y - pos.y;
-      var hitR = stage === 4 ? 38 : 32;
+      { x: cx - 120, y: startY },
+      { x: cx + 100, y: startY + (endY - startY) * 0.33 },
+      { x: cx - 80,  y: startY + (endY - startY) * 0.66 },
+      { x: cx,       y: endY },
+    ];
 
       if (dx * dx + dy * dy <= hitR * hitR) {
         if (this._isUnlocked(world, stage) && !this._isCleared(world, stage)) {
