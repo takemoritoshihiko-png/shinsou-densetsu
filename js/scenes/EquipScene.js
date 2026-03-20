@@ -283,6 +283,7 @@ class EquipScene {
           ctx.fillStyle = item.slots[di] ? SlotTraitData.getColor(item.slots[di].id) : '#333333';
           ctx.fill();
         }
+// スロット特性テキスト表示        var slotTextX = bx + 16;        ctx.font = "8px " + CONFIG.FONT_FAMILY;        ctx.textAlign = "left";        for (var sti = 0; sti < item.slots.length; sti++) {          var stSlot = item.slots[sti];          if (stSlot) {            var stDef = SlotTraitData.getDef(stSlot.id);            if (stDef) {              ctx.fillStyle = SlotTraitData.getColor(stSlot.id);              ctx.fillText(stDef.label + "+" + stSlot.value, slotTextX + sti * 70, iy + 54);            }          }        }
       }
 
       // ステ概要

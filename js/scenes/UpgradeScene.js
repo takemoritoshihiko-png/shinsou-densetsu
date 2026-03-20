@@ -153,7 +153,7 @@ class UpgradeScene {
     ctx.fillText('装備を選択', lx + 8, ly + 14);
 
     var items = this.equip.inventory;
-    var itemH = 44;
+    var itemH = 52;
     var startY = ly + 30;
 
     ctx.save();
@@ -183,7 +183,7 @@ class UpgradeScene {
 
       ctx.font = '10px ' + CONFIG.FONT_FAMILY;
       ctx.fillStyle = '#888888';
-      ctx.fillText(EquipmentData.RANK_NAMES[item.rank] + '  スロット' + (item.slots ? item.slots.length : 0), lx + 14, iy + 30);
+      ctx.fillText(EquipmentData.RANK_NAMES[item.rank] + '  スロット' + (item.slots ? item.slots.length : 0), lx + 14, iy + 30);      // 装備中表示      if (this.equip.isEquipped(item.uid)) {        ctx.font = 'bold 10px ' + CONFIG.FONT_FAMILY;        ctx.textAlign = 'right';        ctx.fillStyle = '#44ff44';        ctx.fillText('装備中', lx + lw - 10, iy + 14);        ctx.textAlign = 'left';      }      // スロット特性テキスト      if (item.slots && item.slots.length > 0) {        var stx2 = lx + 14;        ctx.font = '8px ' + CONFIG.FONT_FAMILY;        for (var si2 = 0; si2 < Math.min(item.slots.length, 3); si2++) {          var sl2 = item.slots[si2];          if (sl2) {            var sd2 = SlotTraitData.getDef(sl2.id);            if (sd2) {              ctx.fillStyle = SlotTraitData.getColor(sl2.id);              ctx.fillText(sd2.label + '+' + sl2.value, stx2, iy + 40);              stx2 += 65;            }          }        }      }
     }
     ctx.restore();
   }
