@@ -50,6 +50,7 @@ class WaveManager {
     // Wave 1〜3: 通常ウェーブ（3〜5体）
     for (var w = 0; w < 2; w++) {
       var count = 3 + Math.floor(Math.random() * 3);
+      if (world === 10) { count = count * 3; }
       var enemies = [];
       for (var i = 0; i < count; i++) {
         var m = monsterPool.length > 0
