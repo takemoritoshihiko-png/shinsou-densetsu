@@ -8,8 +8,8 @@ class HomeScene {
     this.elapsed = 0;
 
     // 8メニューボタン (2行×4列)
-    var bw = 190, bh = 60, gx = 16, gy = 12;
-    var row1y = 310, row2y = row1y + bh + gy;
+    var bw = 190, bh = 55, gx = 16, gy = 10;
+    var row1y = 295, row2y = row1y + bh + gy, row3y = row2y + bh + gy;
     var sx = 40;
     this.buttons = [
       { label: '出撃',     icon: '剣',  scene: 'stageSelect', x: sx,                y: row1y, w: bw, h: bh, grad: ['#4a6a8a','#3a5070'] },
@@ -19,7 +19,9 @@ class HomeScene {
       { label: 'ガチャ',   icon: '★', scene: 'gacha',       x: sx,                y: row2y, w: bw, h: bh, grad: ['#7a6a3a','#6a5a2a'] },
       { label: 'ショップ', icon: '買', scene: 'shop',        x: sx+(bw+gx),        y: row2y, w: bw, h: bh, grad: ['#5a6a6a','#4a5a5a'] },
       { label: 'バッグ',   icon: '袋', scene: 'bag',         x: sx+(bw+gx)*2,      y: row2y, w: bw, h: bh, grad: ['#5a7a6a','#4a6a5a'] },
-      { label: '設定',     icon: '歯',  scene: 'settings',    x: sx+(bw+gx)*3,      y: row2y, w: bw, h: bh, grad: ['#5a5a5a','#4a4a4a'] },
+{ label: 'セーブ',   icon: '保',  scene: 'saveload_save', x: sx,           y: row3y, w: bw, h: bh, grad: ['#6a6a3a','#5a5a2a'] },
+      { label: 'ロード',   icon: '読',  scene: 'saveload_load', x: sx+(bw+gx),   y: row3y, w: bw, h: bh, grad: ['#3a5a6a','#2a4a5a'] },
+      { label: '設定',     icon: '歯',  scene: 'settings',      x: sx+(bw+gx)*2, y: row3y, w: bw, h: bh, grad: ['#5a5a5a','#4a4a4a'] },
     ];
     // セーブ/ロードはボタン配列の外
     this.saveBtn = null;
@@ -233,7 +235,13 @@ class HomeScene {
     for (var i = 0; i < this.buttons.length; i++) {
       var b = this.buttons[i];
       if (x >= b.x && x <= b.x + b.w && y >= b.y && y <= b.y + b.h) {
-        this.sceneManager.changeScene(b.scene);
+        if (b.scene === "saveload_save" || b.scene === "saveload_load") {
+          var sl = this.sceneManager.scenes["saveload"];
+          if (sl) sl.mode = b.scene === "saveload_save" ? "save" : "load";
+          this.sceneManager.changeScene("saveload");
+        } else {
+          this.sceneManager.changeScene(b.scene);
+        }
         return;
       }
     }
