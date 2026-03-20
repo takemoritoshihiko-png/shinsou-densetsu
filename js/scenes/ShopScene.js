@@ -526,7 +526,6 @@ class ShopScene {
     }
   }
 
-  }
 
   _onTapSell(x, y) {
     // スクロールボタン処理
