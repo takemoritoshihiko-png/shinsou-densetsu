@@ -118,16 +118,16 @@ var EquipmentData = {
   // --- 武器ベースデータ ---
 
   WEAPONS: [
-    { baseId: 'w01', name: '木の剣',       reqLv: 1,  atk: 5,  matk: 0, crit: 0.2 },
-    { baseId: 'w02', name: '鉄の剣',       reqLv: 5,  atk: 10, matk: 0, crit: 0.3 },
-    { baseId: 'w03', name: '鋼の剣',       reqLv: 10, atk: 18, matk: 0, crit: 0.5 },
-    { baseId: 'w04', name: '炎の剣',       reqLv: 15, atk: 28, matk: 8, crit: 0.6 },
-    { baseId: 'w05', name: '氷の刃',       reqLv: 20, atk: 35, matk: 12, crit: 0.8 },
-    { baseId: 'w06', name: '雷鳴の剣',     reqLv: 25, atk: 45, matk: 15, crit: 1.0 },
-    { baseId: 'w07', name: '聖剣',         reqLv: 30, atk: 58, matk: 20, crit: 1.2 },
-    { baseId: 'w08', name: '魔剣',         reqLv: 35, atk: 65, matk: 40, crit: 1.5 },
-    { baseId: 'w09', name: '竜殺しの剣',   reqLv: 42, atk: 85, matk: 30, crit: 2.0 },
-    { baseId: 'w10', name: '神器の剣',     reqLv: 50, atk: 110, matk: 45, crit: 3.0 },
+    { baseId: 'w01', name: '木の剣',       reqLv: 1,  atk: 2,  matk: 0, crit: 0.1 },
+    { baseId: 'w02', name: '鉄の剣',       reqLv: 5,  atk: 3, matk: 0, crit: 0.1 },
+    { baseId: 'w03', name: '鋼の剣',       reqLv: 10, atk: 6, matk: 0, crit: 0.2 },
+    { baseId: 'w04', name: '炎の剣',       reqLv: 15, atk: 9, matk: 3, crit: 0.2 },
+    { baseId: 'w05', name: '氷の刃',       reqLv: 20, atk: 12, matk: 4, crit: 0.3 },
+    { baseId: 'w06', name: '雷鳴の剣',     reqLv: 25, atk: 15, matk: 5, crit: 0.3 },
+    { baseId: 'w07', name: '聖剣',         reqLv: 30, atk: 19, matk: 7, crit: 0.4 },
+    { baseId: 'w08', name: '魔剣',         reqLv: 35, atk: 22, matk: 13, crit: 0.5 },
+    { baseId: 'w09', name: '竜殺しの剣',   reqLv: 42, atk: 28, matk: 10, crit: 0.7 },
+    { baseId: 'w10', name: '神器の剣',     reqLv: 50, atk: 37, matk: 15, crit: 1.0 },
   ],
 
   // --- 盾ベースデータ（DEF主体） ---
