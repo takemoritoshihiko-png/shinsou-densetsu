@@ -64,9 +64,10 @@
   <script>
     function hideLoading() {
       var ls = document.getElementById('loading-screen');
-      if (ls && !ls.classList.contains('hidden')) {
-        ls.classList.add('hidden');
-        setTimeout(function() { ls.style.display = 'none'; }, 600);
+      if (ls) {
+        ls.style.opacity = '0';
+        ls.style.pointerEvents = 'none';
+        ls.style.display = 'none';
       }
     }
     window.addEventListener('load', function() {
