@@ -1,15 +1,12 @@
-// セーブ・ロードシステム（3スロット対応）
+// セーブ・ロードシステム（3スロット・環境変更耐性版）
 var SaveSystem = {
 
   SAVE_KEY_PREFIX: 'shinsou_densetsu_slot_',
-  VERSION: 2,
+  VERSION: 3,
   MAX_SLOTS: 3,
 
-  _slotKey: function (slotIndex) {
-    return this.SAVE_KEY_PREFIX + slotIndex;
-  },
+  _slotKey: function (i) { return this.SAVE_KEY_PREFIX + i; },
 
-  // 旧キーの互換（旧セーブを自動でスロット1に移行）
   _migrateOldSave: function () {
     try {
       var old = localStorage.getItem('shinsou_densetsu_save');
@@ -20,18 +17,14 @@ var SaveSystem = {
     } catch (e) {}
   },
 
-  // 指定スロットにセーブデータが存在するか
   hasSaveData: function (slotIndex) {
     if (slotIndex === undefined) {
-      for (var i = 0; i < this.MAX_SLOTS; i++) {
-        if (this.hasSaveData(i)) return true;
-      }
+      for (var i = 0; i < this.MAX_SLOTS; i++) { if (this.hasSaveData(i)) return true; }
       return false;
     }
     try { return !!localStorage.getItem(this._slotKey(slotIndex)); } catch (e) { return false; }
   },
 
-  // 全スロットのサマリーを取得
   getSlotSummaries: function () {
     var summaries = [];
     for (var i = 0; i < this.MAX_SLOTS; i++) {
@@ -45,121 +38,208 @@ var SaveSystem = {
           name: data.player ? data.player.name : '???',
           job: data.player ? data.player.job : '',
           gold: data.player ? data.player.ownedGold : 0,
-          date: d ? (d.getFullYear() + '/' + (d.getMonth() + 1) + '/' + d.getDate() + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2)) : '',
+          date: d ? (d.getFullYear() + '/' + (d.getMonth()+1) + '/' + d.getDate() + ' ' + ('0'+d.getHours()).slice(-2) + ':' + ('0'+d.getMinutes()).slice(-2)) : '',
         });
       } catch (e) { summaries.push(null); }
     }
     return summaries;
   },
 
-  // セーブ
+  // ============================================================
+  // セーブ: プレイヤーの「進行データ」のみを保存
+  // 計算で導出できる値(expToNext, ステータス)は保存しない
+  // 装備はbaseId+rank+upgradeLevel+slots+traitsを保存
+  // ============================================================
   save: function (gameState, slotIndex) {
     if (slotIndex === undefined) slotIndex = 0;
+    var p = gameState.player;
+    var ps = gameState.partySystem;
+    var es = gameState.equipSystem;
+    var bs = gameState.bookSystem;
+
+    // 装備インベントリ: マスターデータ依存しない形で保存
+    var savedInventory = [];
+    for (var i = 0; i < es.inventory.length; i++) {
+      var eq = es.inventory[i];
+      savedInventory.push({
+        uid: eq.uid,
+        baseId: eq.baseId,
+        rank: eq.rank,
+        upgradeLevel: eq.upgradeLevel || 0,
+        innateTraits: eq.innateTraits || [],
+        slots: eq.slots || [],
+      });
+    }
+
     var data = {
       version: this.VERSION,
       timestamp: Date.now(),
+
+      // プレイヤー進行データ
       player: {
-        name: gameState.player.name,
-        level: gameState.player.level,
-        totalExp: gameState.player.totalExp,
-        expToNext: gameState.player.expToNext,
-        ownedGold: gameState.player.ownedGold,
-        job: gameState.player.job,
-        rarity: gameState.player.rarity,
-        classLevels: gameState.player.classLevels,
+        name: p.name,
+        level: p.level,
+        totalExp: p.totalExp,
+        ownedGold: p.ownedGold,
+        job: p.job,
+        rarity: p.rarity,
+        classLevels: p.classLevels,
+        // HP/MP/ATK等のステータスは保存しない（ロード時に再計算）
       },
+
+      // パーティ
       party: {
-        characters: gameState.partySystem.characters,
-        frontLine: gameState.partySystem.frontLine,
-        reserve: gameState.partySystem.reserve,
-        enhanceMaterials: gameState.partySystem.enhanceMaterials || 0,
-        _nextId: gameState.partySystem._nextId,
+        characters: ps.characters,
+        frontLine: ps.frontLine,
+        reserve: ps.reserve,
+        enhanceMaterials: ps.enhanceMaterials || 0,
+        _nextId: ps._nextId,
       },
+
+      // 装備（baseId+ランク+強化値+特性のみ。baseStatsは保存しない）
       equipment: {
-        inventory: gameState.equipSystem.inventory,
-        equipped: gameState.equipSystem.equipped,
-        cores: gameState.equipSystem.cores,
-        rerollStones: gameState.equipSystem.rerollStones,
-        eraseStones: gameState.equipSystem.eraseStones,
-        hpPotions: gameState.equipSystem.hpPotions,
-        mpPotions: gameState.equipSystem.mpPotions,
-        _nextUid: gameState.equipSystem._nextUid,
-        presets: gameState.equipSystem.presets,
+        inventory: savedInventory,
+        equipped: es.equipped,
+        cores: es.cores,
+        rerollStones: es.rerollStones,
+        eraseStones: es.eraseStones,
+        hpPotions: es.hpPotions,
+        mpPotions: es.mpPotions,
+        _nextUid: es._nextUid,
+        presets: es.presets,
       },
+
+      // ステージ進行
       stageProgress: gameState.stageSelectScene ? gameState.stageSelectScene.progress : {},
+
+      // 図鑑（発見記録のみ）
       book: {
-        monsters: gameState.bookSystem.monsters,
-        equipment: gameState.bookSystem.equipment,
-        items: gameState.bookSystem.items,
+        monsters: bs.monsters,
+        equipment: bs.equipment,
+        items: bs.items,
       },
-      settings: gameState.settings || { bgmVolume: 0.7, seVolume: 0.8 },
     };
+
     try {
       localStorage.setItem(this._slotKey(slotIndex), JSON.stringify(data));
-      console.log('スロット' + (slotIndex + 1) + 'にセーブ完了');
       return true;
-    } catch (e) { console.error('セーブ失敗:', e); return false; }
+    } catch (e) { return false; }
   },
 
-  // ロード
   load: function (slotIndex) {
     if (slotIndex === undefined) slotIndex = 0;
     try {
       var raw = localStorage.getItem(this._slotKey(slotIndex));
       if (!raw) return null;
       var data = JSON.parse(raw);
-      if (!data || !data.version) return null;
+      if (!data) return null;
       return data;
-    } catch (e) { console.error('ロード失敗:', e); return null; }
+    } catch (e) { return null; }
   },
 
-  // ロードデータをゲーム状態に適用
+  // ============================================================
+  // ロード: 保存データからゲーム状態を復元
+  // ステータスは現在のマスターデータから再計算
+  // 装備のbaseStatsもマスターデータから再生成
+  // ============================================================
   applyLoad: function (data, gameState) {
-    if (!data) return false;
+    if (!data || !data.player) return false;
     var p = gameState.player;
     var ps = gameState.partySystem;
     var es = gameState.equipSystem;
     var bs = gameState.bookSystem;
     var ss = gameState.stageSelectScene;
-    if (!data.player || !data.party || !data.equipment) return false;
 
+    // --- プレイヤー ---
     var pd = data.player;
-    p.name = pd.name; p.level = pd.level; p.totalExp = pd.totalExp;
-    p.expToNext = pd.expToNext; p.ownedGold = pd.ownedGold;
-    p.job = pd.job; p.rarity = pd.rarity;
-    if (pd.classLevels) p.classLevels = pd.classLevels;
+    p.name = pd.name || 'プレイヤー';
+    p.level = pd.level || 1;
+    p.totalExp = pd.totalExp || 0;
+    p.ownedGold = pd.ownedGold || 0;
+    p.job = pd.job || 'warrior';
+    p.rarity = pd.rarity || 'SR';
+    p.classLevels = pd.classLevels || {};
+    // expToNextは現在の計算式から導出
+    p.expToNext = LevelSystem.expToNext(p.level);
 
-    var ptd = data.party;
-    ps.characters = ptd.characters || [];
-    ps.frontLine = ptd.frontLine || [null, null, null];
-    ps.reserve = ptd.reserve || [null, null, null];
-    ps.enhanceMaterials = ptd.enhanceMaterials || 0;
-    ps._nextId = ptd._nextId || ps.characters.length + 1;
+    // --- パーティ ---
+    if (data.party) {
+      var ptd = data.party;
+      ps.characters = ptd.characters || [];
+      ps.frontLine = ptd.frontLine || [null, null, null];
+      ps.reserve = ptd.reserve || [null, null, null];
+      ps.enhanceMaterials = ptd.enhanceMaterials || 0;
+      ps._nextId = ptd._nextId || ps.characters.length + 1;
+    }
 
-    var ed = data.equipment;
-    es.inventory = ed.inventory || [];
-    es.equipped = ed.equipped || { weapon: null, shield: null, head: null, body: null, feet: null, accessory: null };
-    es.cores = ed.cores || { common: 0, uncommon: 0, rare: 0, epic: 0, legend: 0 };
-    es.rerollStones = ed.rerollStones || 0;
-    es.eraseStones = ed.eraseStones || 0;
-    es.hpPotions = ed.hpPotions || 0;
-    es.mpPotions = ed.mpPotions || 0;
-    es._nextUid = ed._nextUid || es.inventory.length + 1;
-    es.presets = ed.presets || [];
+    // --- 装備 ---
+    if (data.equipment) {
+      var ed = data.equipment;
 
-    if (ss && data.stageProgress) ss.progress = data.stageProgress;
+      // インベントリ復元: baseStatsをマスターデータから再計算
+      es.inventory = [];
+      var savedInv = ed.inventory || [];
+      for (var i = 0; i < savedInv.length; i++) {
+        var si = savedInv[i];
+        var base = EquipmentData.getBase(si.baseId);
+        if (!base) continue; // マスターデータから削除された装備はスキップ
+
+        var stats = EquipmentData.calcStats(si.baseId, si.rank);
+        var displayName = EquipmentData.buildName(base.name, si.innateTraits || []);
+        if (si.upgradeLevel > 0) displayName += ' +' + si.upgradeLevel;
+
+        es.inventory.push({
+          uid: si.uid,
+          baseId: si.baseId,
+          baseName: base.name,
+          name: displayName,
+          slot: base.slot || 'weapon',
+          rank: si.rank,
+          requiredLevel: base.reqLv,
+          baseStats: stats,                    // マスターデータから再計算
+          innateTraits: si.innateTraits || [],
+          slots: si.slots || [],
+          upgradeLevel: si.upgradeLevel || 0,
+        });
+      }
+
+      es.equipped = ed.equipped || { weapon: null, shield: null, head: null, body: null, feet: null, accessory: null };
+      es.cores = ed.cores || { common: 0, uncommon: 0, rare: 0, epic: 0, legend: 0 };
+      es.rerollStones = ed.rerollStones || 0;
+      es.eraseStones = ed.eraseStones || 0;
+      es.hpPotions = ed.hpPotions || 0;
+      es.mpPotions = ed.mpPotions || 0;
+      es._nextUid = ed._nextUid || es.inventory.length + 1;
+      es.presets = ed.presets || [];
+
+      // 装備中のUIDが存在するか検証（削除された装備への参照をクリア）
+      for (var slot in es.equipped) {
+        if (es.equipped[slot] && !es.getByUid(es.equipped[slot])) {
+          es.equipped[slot] = null;
+        }
+      }
+    }
+
+    // --- ステージ進行 ---
+    if (ss && data.stageProgress) {
+      ss.progress = data.stageProgress;
+    }
+
+    // --- 図鑑 ---
     if (bs && data.book) {
       bs.monsters = data.book.monsters || {};
       bs.equipment = data.book.equipment || {};
       bs.items = data.book.items || {};
     }
-    if (data.settings) gameState.settings = data.settings;
 
-    p._applyStats(); p.hp = p.hpMax; p.mp = p.mpMax;
+    // --- ステータス再計算（現在のマスターデータ＋装備ボーナスから） ---
+    p._applyStats();
+    p.hp = p.hpMax;
+    p.mp = p.mpMax;
+
     return true;
   },
 
-  // スロット削除
   deleteSave: function (slotIndex) {
     if (slotIndex === undefined) {
       for (var i = 0; i < this.MAX_SLOTS; i++) this.deleteSave(i);
