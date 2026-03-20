@@ -24,11 +24,11 @@ var EquipmentData = {
 
   // 特性の数値レンジ（ランク別） [min, max]（%系の値）
   TRAIT_VALUE_RANGE: {
-    common:   [1, 3],
-    uncommon: [2, 5],
-    rare:     [4, 8],
-    epic:     [7, 12],
-    legend:   [10, 18],
+    common:   [0.5, 2],
+    uncommon: [1, 3],
+    rare:     [2, 5],
+    epic:     [3, 7],
+    legend:   [5, 10],
   },
 
   // 特性候補テーブル

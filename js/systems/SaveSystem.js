@@ -197,6 +197,8 @@ var SaveSystem = {
           rank: si.rank,
           requiredLevel: base.reqLv,
           baseStats: stats,                    // マスターデータから再計算
+          innateTraits: this._clampTraits(si.innateTraits || [], si.rank, 'innate'),
+          slots: this._clampTraits(si.slots || [], si.rank, 'slot'),
           innateTraits: si.innateTraits || [],
           slots: si.slots || [],
           upgradeLevel: si.upgradeLevel || 0,
@@ -238,6 +240,32 @@ var SaveSystem = {
     p.mp = p.mpMax;
 
     return true;
+  },
+
+
+  // 特性値を現在のレンジにクランプ
+  _clampTraits: function (traits, rank, type) {
+    if (!traits || traits.length === 0) return traits;
+    var result = [];
+    for (var i = 0; i < traits.length; i++) {
+      var tr = traits[i];
+      if (!tr) { result.push(null); continue; }
+      var maxVal = 10;
+      if (type === 'slot') {
+        var sDef = SlotTraitData.getDef(tr.id);
+        if (sDef && sDef.ranks && sDef.ranks[rank]) {
+          maxVal = sDef.ranks[rank][1];
+        }
+      } else {
+        var tDef = EquipmentData.getTraitDef(tr.id);
+        var isSpecial = tDef && EquipmentData.SPECIAL_TRAIT_KEYS.indexOf(tDef.key) >= 0;
+        var range = isSpecial ? EquipmentData.SPECIAL_TRAIT_RANGE[rank] : EquipmentData.TRAIT_VALUE_RANGE[rank];
+        if (range) maxVal = range[1];
+      }
+      var clampedVal = Math.min(tr.value, maxVal);
+      result.push({ id: tr.id, key: tr.key, value: Math.round(clampedVal * 10) / 10 });
+    }
+    return result;
   },
 
   deleteSave: function (slotIndex) {

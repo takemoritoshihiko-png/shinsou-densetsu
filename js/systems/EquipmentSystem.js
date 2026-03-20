@@ -112,7 +112,7 @@ class EquipmentSystem {
       var statKey = this._STAT_PCT_MAP[tr.key];
       if (statKey) {
         var baseVal = baseStats[statKey] || 0;
-        var boostedValue = tr.value * (upgMul || 1);
+        var boostedValue = tr.value * (1 + ((upgMul || 1) - 1) * 0.5);
         var addVal = baseVal * boostedValue / 100;
         if (statKey === 'crit') {
           bonus[statKey] = Math.round((bonus[statKey] + addVal) * 10) / 10;
