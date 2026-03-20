@@ -57,7 +57,7 @@ class StageSelectScene {
     this.progress[key].stars = 3;
 
     // 次のステージを解放
-    if (stage < 5) {
+    if (stage < 4) {
       this._ensureUnlocked(world, stage + 1);
     } else if (world < 10) {
       // 次のワールドのステージ1を解放
@@ -70,7 +70,7 @@ class StageSelectScene {
     var worldBase = [0, 1, 8, 15, 22, 30, 38, 46, 55, 65, 80];
     var base = worldBase[world] || 1;
     var nextBase = worldBase[Math.min(world + 1, 10)] || base + 8;
-    var stageStep = Math.floor((nextBase - base) / 5);
+    var stageStep = Math.floor((nextBase - base) / 4);
     return base + (stage - 1) * stageStep;
   }
 
@@ -186,7 +186,7 @@ class StageSelectScene {
       var isUnlocked = this._isUnlocked(wd.id, 1);
 
       // ワールドがクリア済みか（最終ステージクリア）
-      var allCleared = this._isCleared(wd.id, 5);
+      var allCleared = this._isCleared(wd.id, 4);
 
       ctx.fillStyle = isSel ? 'rgba(255,255,255,0.2)' :
                       isUnlocked ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.3)';
@@ -217,12 +217,7 @@ class StageSelectScene {
     var cx = W / 2;
 
     // ステージ1〜5を蛇行配置
-    var positions = [
-      { x: cx - 140, y: startY },
-      { x: cx + 100, y: startY + (endY - startY) * 0.2 },
-      { x: cx - 80,  y: startY + (endY - startY) * 0.42 },
-      { x: cx + 120, y: startY + (endY - startY) * 0.65 },
-      { x: cx,       y: endY },
+var positions = [      { x: cx - 120, y: startY },      { x: cx + 100, y: startY + (endY - startY) * 0.3 },      { x: cx - 80,  y: startY + (endY - startY) * 0.6 },      { x: cx,       y: endY },    ];
     ];
 
     // 接続線を先に描画
@@ -238,12 +233,12 @@ class StageSelectScene {
     ctx.setLineDash([]);
 
     // ノード描画
-    for (var s = 0; s < 5; s++) {
+    for (var s = 0; s < 4; s++) {
       var stage = s + 1;
       var pos = positions[s];
       var unlocked = this._isUnlocked(world, stage);
       var cleared = this._isCleared(world, stage);
-      var isBoss = stage === 5;
+      var isBoss = stage === 4;
       var recLv = this._getRecLevel(world, stage);
       var wd = this.worlds[world - 1];
 
@@ -358,15 +353,10 @@ class StageSelectScene {
       { x: cx + 100, y: startY + (endY - startY) * 0.2 },
       { x: cx - 80,  y: startY + (endY - startY) * 0.42 },
       { x: cx + 120, y: startY + (endY - startY) * 0.65 },
-      { x: cx,       y: endY },
-    ];
-
-    for (var s = 0; s < 5; s++) {
-      var pos = positions[s];
-      var stage = s + 1;
+var positions = [      { x: cx - 120, y: startY },      { x: cx + 100, y: startY + (endY - startY) * 0.3 },      { x: cx - 80,  y: startY + (endY - startY) * 0.6 },      { x: cx,       y: endY },    ];
       var dx = x - pos.x;
       var dy = y - pos.y;
-      var hitR = stage === 5 ? 38 : 32;
+      var hitR = stage === 4 ? 38 : 32;
 
       if (dx * dx + dy * dy <= hitR * hitR) {
         if (this._isUnlocked(world, stage) && !this._isCleared(world, stage)) {

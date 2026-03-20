@@ -8,7 +8,7 @@ class WaveManager {
     // ウェーブ定義（3通常 + 1ボス = 計4ウェーブ）
     this.waves = [];
     this.currentWave = 0;
-    this.totalWaves = 4;
+    this.totalWaves = 3;
 
     // スポーン管理
     this.spawnQueue = [];
@@ -48,7 +48,7 @@ class WaveManager {
     var monsterPool = MonsterData.getMonsters(world);
 
     // Wave 1〜3: 通常ウェーブ（3〜5体）
-    for (var w = 0; w < 3; w++) {
+    for (var w = 0; w < 2; w++) {
       var count = 3 + Math.floor(Math.random() * 3);
       var enemies = [];
       for (var i = 0; i < count; i++) {
@@ -80,11 +80,11 @@ class WaveManager {
       this.waves.push({ enemies: enemies, isBoss: false });
     }
 
-    // Wave 4: ボス戦
+    // Wave 3: ボス戦
     var bossData = MonsterData.getBoss(world);
     var fallbackBoss = { hp: 200, atk: 12, matk: 0, def: 8, mdef: 3, spd: 30, exp: 50, gold: 30, spriteColor: '#882222', name: 'ボス' };
     if (!bossData) bossData = fallbackBoss;
-    if (stage < 5) {
+    if (stage < 4) {
       // 中ボス（雑魚の強化版）
       var midBoss = monsterPool.length > 0 ? monsterPool[monsterPool.length - 1] : bossData;
       var mbMul = stageMul * 1.5;
