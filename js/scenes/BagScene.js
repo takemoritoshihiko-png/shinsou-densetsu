@@ -501,6 +501,8 @@ class BagScene {
 
   onTap(x, y) {
     // 詳細ポップアップ
+    if (x >= 890 && x <= 940 && y >= 20 && y <= 50) { this.scrollY = Math.max(0, this.scrollY - 100); return; }
+    if (x >= 890 && x <= 940 && y >= 55 && y <= 85) { this.scrollY = this.scrollY + 100; return; }
     if (this.detailItem) {
       var px = 180, py = 30, pw = 600, ph = 480;
       if (x < px || x > px + pw || y < py || y > py + ph || (x > px + pw - 80 && y < py + 30)) {

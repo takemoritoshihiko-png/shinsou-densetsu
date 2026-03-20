@@ -201,6 +201,8 @@ class ResultScene {
 
   onTap(x, y) {
     if (this.elapsed < 1200) return;
+    if (x >= 890 && x <= 940 && y >= 130 && y <= 160) { this.scrollY = Math.max(0, this.scrollY - 80); return; }
+    if (x >= 890 && x <= 940 && y >= 165 && y <= 195) { this.scrollY = this.scrollY + 80; return; }
     var btn = this.homeButton;
     if (x >= btn.x && x <= btn.x + btn.w && y >= btn.y && y <= btn.y + btn.h) {
       this.sceneManager.changeScene('home');

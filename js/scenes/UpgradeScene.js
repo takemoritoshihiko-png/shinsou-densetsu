@@ -210,6 +210,7 @@ class UpgradeScene {
       }
     }
     ctx.restore();
+ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(10,430,40,24);ctx.fillRect(10,460,40,24);    ctx.font="bold 14px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";    ctx.fillText("^",30,442);ctx.fillText("v",30,472);
   }
 
   _renderUpgradeCenter(ctx) {
@@ -642,6 +643,10 @@ class UpgradeScene {
   // ===================== タップ処理 =====================
   onTap(x, y) {
     // 確認ダイアログ
+    if(x>=10&&x<=50&&y>=430&&y<=455){this.equipScrollY=Math.max(0,this.equipScrollY-100);return;}
+    if(x>=10&&x<=50&&y>=460&&y<=485){this.equipScrollY=this.equipScrollY+100;return;}
+    if (x >= 10 && x <= 50 && y >= 430 && y <= 455) { this.equipScrollY = Math.max(0, this.equipScrollY - 100); return; }
+    if (x >= 10 && x <= 50 && y >= 460 && y <= 485) { this.equipScrollY = this.equipScrollY + 100; return; }
     if (this.confirmDialog) {
       var dx = 280, dy = 180;
       if (x >= dx + 60 && x <= dx + 180 && y >= dy + 110 && y <= dy + 150) {

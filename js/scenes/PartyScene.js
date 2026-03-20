@@ -236,6 +236,10 @@ class PartyScene {
     }
 
     ctx.restore();
+ctx.fillStyle="rgba(255,255,255,0.2)";ctx.fillRect(890,20,50,28);ctx.fillRect(890,55,50,28);    ctx.font="bold 16px sans-serif";ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillStyle="#fff";    ctx.fillText("^",915,34);ctx.fillText("v",915,69);
+    ctx.fillStyle='rgba(255,255,255,0.2)';ctx.fillRect(890,20,50,28);ctx.fillRect(890,55,50,28);
+    ctx.font='bold 16px sans-serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillStyle='#fff';
+    ctx.fillText('^',915,34);ctx.fillText('v',915,69);
   }
 
   _renderPassiveSummary(ctx) {
@@ -282,6 +286,10 @@ class PartyScene {
 
   onTap(x, y) {
     // 戻る
+    if(x>=890&&x<=940&&y>=20&&y<=50){this.listScrollY=Math.max(0,this.listScrollY-100);return;}
+    if(x>=890&&x<=940&&y>=55&&y<=85){this.listScrollY=this.listScrollY+100;return;}
+    if (x >= 890 && x <= 940 && y >= 20 && y <= 50) { this.listScrollY = Math.max(0, this.listScrollY - 100); return; }
+    if (x >= 890 && x <= 940 && y >= 55 && y <= 85) { this.listScrollY = this.listScrollY + 100; return; }
     var bb = this.backButton;
     if (x >= bb.x && x <= bb.x + bb.w && y >= bb.y && y <= bb.y + bb.h) {
       this.player._applyStats();

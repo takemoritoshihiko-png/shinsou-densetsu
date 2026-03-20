@@ -383,6 +383,8 @@ class BookScene {
 
   onTap(x, y) {
     if (this.detail) {
+    if (x >= 890 && x <= 940 && y >= 20 && y <= 50) { this.scrollY = Math.max(0, this.scrollY - 100); return; }
+    if (x >= 890 && x <= 940 && y >= 55 && y <= 85) { this.scrollY = this.scrollY + 100; return; }
       var px = 200, py = 60, pw = 560, ph = 420;
       if (x < px || x > px + pw || y < py || y > py + ph || (x > px + pw - 80 && y < py + 30)) {
         this.detail = null;
