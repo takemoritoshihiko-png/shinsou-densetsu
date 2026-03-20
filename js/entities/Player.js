@@ -135,7 +135,15 @@ class Player {
     if (this.y < margin) this.y = margin;
     if (this.x > CONFIG.FIELD_W - this.width - margin) this.x = CONFIG.FIELD_W - this.width - margin;
     if (this.y > CONFIG.FIELD_H - this.height - margin) this.y = CONFIG.FIELD_H - this.height - margin;
+
+    // 自動攻撃タイマー
+    this.attackTimer += sec;
+    if (this.attackTimer >= this.attackInterval) {
+      this.attackTimer = 0;
+      this._tryAutoAttack();
+    }
   }
+
 
   _tryAutoAttack() {
     if (this.hp <= 0) return;

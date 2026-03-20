@@ -43,6 +43,7 @@ class Enemy {
     this.attackTimer = 0;
 
     this.alive = true;
+this._aliveTime = 0;
     this.deathEffect = false;
     this.deathTimer = 0;
     this.deathDuration = this.isBoss ? 600 : 300;
@@ -61,6 +62,17 @@ class Enemy {
         this.deathTimer += dt;
         if (this.deathTimer >= this.deathDuration) this.deathEffect = false;
       }
+      return;
+    }
+
+    var sec = dt / 1000;
+
+    // 生存時間カウンター（30秒で自動退場）
+    this._aliveTime += dt;
+    if (this._aliveTime > 30000) {
+      this.alive = false;
+      this.deathEffect = true;
+      this.deathTimer = 0;
       return;
     }
 

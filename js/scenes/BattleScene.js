@@ -22,9 +22,9 @@ class BattleScene {
     this.endTimer = 0;
     this.endDelay = 1500;
     this.endResult = '';
-    this.autoEnabled = false;
+    this.autoEnabled = true;
     this.autoTimer = 0;
-    this.autoInterval = 1200;
+    this.autoInterval = 800;
     // フィールド装飾
     this._grassTiles = [];
     this._treeTiles = [];
