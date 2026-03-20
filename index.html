@@ -18,14 +18,6 @@
     <div id="loading-text">読み込み中...</div>
   </div>
 
-  <div id="rotate-msg">
-    <div class="rotate-inner">
-      <div class="rotate-icon">&#x1F4F1; &#x27A1; &#x1F4F2;</div>
-      <div>横向きにするか<br>下のボタンをタップ</div>
-      <button id="force-landscape-btn">横向きモードで開始</button>
-    </div>
-  </div>
-
   <div id="game-container">
     <canvas id="game-canvas"></canvas>
   </div>
@@ -85,54 +77,6 @@
       setTimeout(hideLoading, 400);
     });
     setTimeout(hideLoading, 3000);
-
-    // iPhone/iPad: 縦向き時に強制横向きモード
-    var _forceLandscape = false;
-    function checkOrientation() {
-      var w = window.innerWidth, h = window.innerHeight;
-      var isPortrait = h > w;
-      var rotateMsg = document.getElementById('rotate-msg');
-      var container = document.getElementById('game-container');
-
-      if (isPortrait && !_forceLandscape) {
-        rotateMsg.style.display = 'flex';
-        container.style.display = 'none';
-      } else if (isPortrait && _forceLandscape) {
-        rotateMsg.style.display = 'none';
-        container.style.display = 'block';
-        container.style.transform = 'translate(-50%, -50%) rotate(90deg)';
-        container.style.transformOrigin = 'center center';
-        // 縦のサイズを横として使う
-        var scale = Math.min(h / CONFIG.CANVAS_WIDTH, w / CONFIG.CANVAS_HEIGHT);
-        container.style.width = (CONFIG.CANVAS_WIDTH * scale) + 'px';
-        container.style.height = (CONFIG.CANVAS_HEIGHT * scale) + 'px';
-        var cv = document.getElementById('game-canvas');
-        cv.style.width = (CONFIG.CANVAS_WIDTH * scale) + 'px';
-        cv.style.height = (CONFIG.CANVAS_HEIGHT * scale) + 'px';
-      } else {
-        // 横向き（通常）
-        rotateMsg.style.display = 'none';
-        container.style.display = 'block';
-        container.style.transform = 'translate(-50%, -50%)';
-      }
-    }
-
-    document.getElementById('force-landscape-btn').addEventListener('click', function() {
-      _forceLandscape = true;
-      SoundSystem.resume();
-      checkOrientation();
-      // リサイズイベントを発火してmain.jsのresizeを呼ぶ
-      window.dispatchEvent(new Event('resize'));
-    });
-
-    window.addEventListener('resize', function() {
-      setTimeout(checkOrientation, 100);
-    });
-    window.addEventListener('orientationchange', function() {
-      _forceLandscape = false;
-      setTimeout(checkOrientation, 300);
-    });
-    setTimeout(checkOrientation, 500);
   </script>
 </body>
 </html>

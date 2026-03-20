@@ -67,14 +67,6 @@ class InputManager {
     var scale = this.getScale();
     var cx = (touch.clientX - rect.left) / scale;
     var cy = (touch.clientY - rect.top) / scale;
-    // 縦向き強制横向きモード: タッチ座標を90度回転
-    if (window._forceLandscape && window.innerHeight > window.innerWidth) {
-      var rw = rect.width, rh = rect.height;
-      var rawX = touch.clientX - rect.left;
-      var rawY = touch.clientY - rect.top;
-      cx = (rawY / rh) * CONFIG.CANVAS_WIDTH;
-      cy = (1 - rawX / rw) * CONFIG.CANVAS_HEIGHT;
-    }
     return { x: cx, y: cy };
   }
 
