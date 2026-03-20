@@ -66,8 +66,15 @@ class WaveManager {
           crit: 0,
           exp: Math.floor(m.exp * stageMul),
           gold: Math.floor(m.gold * stageMul),
-          spriteColor: m.spriteColor,
+          spriteColor: m.spriteColor || m.color,
           monsterName: m.name,
+          race: m.race || "",
+          grade: m.grade || 1,
+          color: m.color || m.spriteColor,
+          eye: m.eye || "",
+          shape: m.shape || "",
+          crown: m.crown, flame: m.flame, spark: m.spark,
+          aura: m.aura, fire: m.fire, wing: m.wing,
         });
       }
       this.waves.push({ enemies: enemies, isBoss: false });
