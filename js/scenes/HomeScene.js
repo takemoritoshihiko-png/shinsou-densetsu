@@ -12,14 +12,14 @@ class HomeScene {
     var row1y = 310, row2y = row1y + bh + gy;
     var sx = 40;
     this.buttons = [
-      { label: '出撃',     icon: '⚔',  scene: 'stageSelect', x: sx,                y: row1y, w: bw, h: bh, grad: ['#4a6a8a','#3a5070'] },
-      { label: 'パーティ', icon: '👥', scene: 'party',       x: sx+(bw+gx),        y: row1y, w: bw, h: bh, grad: ['#5a5a7a','#4a4a6a'] },
-      { label: '装備',     icon: '🛡',  scene: 'equip',       x: sx+(bw+gx)*2,      y: row1y, w: bw, h: bh, grad: ['#6a6a7a','#555568'] },
-      { label: '強化',     icon: '🔨', scene: 'upgrade',     x: sx+(bw+gx)*3,      y: row1y, w: bw, h: bh, grad: ['#7a5a3a','#6a4a2a'] },
-      { label: 'ガチャ',   icon: '✨', scene: 'gacha',       x: sx,                y: row2y, w: bw, h: bh, grad: ['#7a6a3a','#6a5a2a'] },
-      { label: 'ショップ', icon: '🛒', scene: 'shop',        x: sx+(bw+gx),        y: row2y, w: bw, h: bh, grad: ['#5a6a6a','#4a5a5a'] },
-      { label: 'バッグ',   icon: '🎒', scene: 'bag',         x: sx+(bw+gx)*2,      y: row2y, w: bw, h: bh, grad: ['#5a7a6a','#4a6a5a'] },
-      { label: '設定',     icon: '⚙',  scene: 'settings',    x: sx+(bw+gx)*3,      y: row2y, w: bw, h: bh, grad: ['#5a5a5a','#4a4a4a'] },
+      { label: '出撃',     icon: '剣',  scene: 'stageSelect', x: sx,                y: row1y, w: bw, h: bh, grad: ['#4a6a8a','#3a5070'] },
+      { label: 'パーティ', icon: '人', scene: 'party',       x: sx+(bw+gx),        y: row1y, w: bw, h: bh, grad: ['#5a5a7a','#4a4a6a'] },
+      { label: '装備',     icon: '盾',  scene: 'equip',       x: sx+(bw+gx)*2,      y: row1y, w: bw, h: bh, grad: ['#6a6a7a','#555568'] },
+      { label: '強化',     icon: '鍛', scene: 'upgrade',     x: sx+(bw+gx)*3,      y: row1y, w: bw, h: bh, grad: ['#7a5a3a','#6a4a2a'] },
+      { label: 'ガチャ',   icon: '★', scene: 'gacha',       x: sx,                y: row2y, w: bw, h: bh, grad: ['#7a6a3a','#6a5a2a'] },
+      { label: 'ショップ', icon: '買', scene: 'shop',        x: sx+(bw+gx),        y: row2y, w: bw, h: bh, grad: ['#5a6a6a','#4a5a5a'] },
+      { label: 'バッグ',   icon: '袋', scene: 'bag',         x: sx+(bw+gx)*2,      y: row2y, w: bw, h: bh, grad: ['#5a7a6a','#4a6a5a'] },
+      { label: '設定',     icon: '歯',  scene: 'settings',    x: sx+(bw+gx)*3,      y: row2y, w: bw, h: bh, grad: ['#5a5a5a','#4a4a4a'] },
     ];
     // セーブ/ロードはボタン配列の外
     this.saveBtn = null;
@@ -124,9 +124,9 @@ class HomeScene {
     // ゴールド・素材・石
     var resY = panelY + 100;
     ctx.font = 'bold 14px ' + CONFIG.FONT_FAMILY; ctx.textAlign = 'left';
-    ctx.fillStyle = '#ffd700'; ctx.fillText('💰 ' + p.ownedGold + ' G', panelX + 20, resY);
-    ctx.fillStyle = '#ff8844'; ctx.fillText('🧱 素材:' + (this.party ? (this.party.enhanceMaterials || 0) : 0), panelX + 160, resY);
-    ctx.fillStyle = '#44aaff'; ctx.fillText('💎 石:' + (p.equipSystem ? p.equipSystem.rerollStones : 0), panelX + 310, resY);
+    ctx.fillStyle = '#ffd700'; ctx.fillText('G ' + p.ownedGold + ' G', panelX + 20, resY);
+    ctx.fillStyle = '#ff8844'; ctx.fillText('素材:' + (this.party ? (this.party.enhanceMaterials || 0) : 0), panelX + 160, resY);
+    ctx.fillStyle = '#44aaff'; ctx.fillText('石:' + (p.equipSystem ? p.equipSystem.rerollStones : 0), panelX + 310, resY);
 
     // === 右パネル: ステータス ===
     var spX = 470, spY = 56, spW = 460, spH = 230;
